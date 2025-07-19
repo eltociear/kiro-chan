@@ -1,40 +1,38 @@
 import * as vscode from 'vscode';
-import { IStatusBarCharacter, KiroState } from './types';
+import { IStatusBarCharacter, KiroState, AnimationPattern } from './types';
+import { AnimationController } from './animation/AnimationController';
 import { StateMonitor } from './state/StateMonitor';
-import { SettingsManagerVSCode } from './settings/SettingsManagerVSCode';
+import { StateAnimationBridge } from './state/StateAnimationBridge';
+import { SettingsManager } from './settings/SettingsManager';
+import { PerformanceOptimizer } from './performance/PerformanceOptimizer';
 import { ErrorHandler, ErrorContext } from './error/ErrorHandler';
 
 export class StatusBarCharacterVSCode implements IStatusBarCharacter {
   private statusBarItem: vscode.StatusBarItem;
+  private animationController: AnimationController;
   private stateMonitor: StateMonitor;
-  private settingsManager: SettingsManagerVSCode;
+  private stateAnimationBridge: StateAnimationBridge;
+  private settingsManager: SettingsManager;
+  private performanceOptimizer: PerformanceOptimizer;
   private errorHandler: ErrorHandler;
   private isInitialized: boolean = false;
-  private animationTimer: NodeJS.Timeout | null = null;
-  private currentState: KiroState = KiroState.IDLE;
-  private animationFrame: number = 0;
-
-  // キャラクターの状態別表示
-  private readonly characters = {
-    [KiroState.IDLE]: ['👻', '🌟', '✨'],
-    [KiroState.EXECUTING]: ['🚀', '⚡', '💫', '🔥'],
-    [KiroState.ERROR]: ['💥', '⚠️', '🚨', '❌']
-  };
+  private animationInterval: NodeJS.Timeout | null = null;
+  private currentAnimationFrame: number = 0;
 
   constructor() {
-    // VS CodeのStatusBarItemを作成
-    this.statusBarItem = vscode.window.createStatusBarItem(
-      vscode.StatusBarAlignment.Right,
-      100 // 優先度
-    );
-    
     this.errorHandler = ErrorHandler.getInstance();
-    this.settingsManager = new SettingsManagerVSCode();
+    this.settingsManager = new SettingsManager();
+    this.performanceOptimizer = new PerformanceOptimizer();
+    this.animationController = new AnimationController(undefined, this.performanceOptimizer);
     this.stateMonitor = new StateMonitor();
+    this.stateAnimationBridge = new StateAnimationBridge(this.stateMonitor, this.animationController);
     
-    this.setupStatusBarItem();
-    this.setupStateMonitoring();
-    this.setupConfigurationWatcher();
+    // Create VS Code status bar item
+    this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+    this.statusBarItem.command = 'kiro-chan.openSettings';
+    this.statusBarItem.tooltip = 'Kiro Character - Click to open settings';
+    
+    this.setupErrorHandling();
   }
 
   async initialize(): Promise<void> {
@@ -43,17 +41,20 @@ export class StatusBarCharacterVSCode implements IStatusBarCharacter {
     }
 
     try {
-      // 設定を読み込み
-      await this.settingsManager.loadSettings();
-      
-      // ステータスバーアイテムを表示
+      // Load settings from VS Code configuration
+      await this.loadVSCodeSettings();
+
+      // Initialize components
+      this.initializeComponents();
+
+      // Start services
+      this.startServices();
+
+      // Show the status bar item if enabled
       if (this.settingsManager.isEnabled()) {
         this.show();
       }
-      
-      // 状態監視を開始
-      this.stateMonitor.startMonitoring();
-      
+
       this.isInitialized = true;
       console.log('[StatusBarCharacterVSCode] Initialized successfully');
     } catch (error) {
@@ -66,8 +67,10 @@ export class StatusBarCharacterVSCode implements IStatusBarCharacter {
 
   show(): void {
     try {
-      this.statusBarItem.show();
-      this.startAnimation();
+      if (this.settingsManager.isEnabled()) {
+        this.statusBarItem.show();
+        this.startAnimation();
+      }
     } catch (error) {
       this.errorHandler.handleError(error as Error, ErrorContext.DOM_MANIPULATION, {
         action: 'show'
@@ -87,17 +90,25 @@ export class StatusBarCharacterVSCode implements IStatusBarCharacter {
   }
 
   updateState(state: KiroState): void {
-    this.currentState = state;
     this.stateMonitor.forceStateChange(state);
-    this.updateDisplay();
+    this.updateStatusBarText(state);
   }
 
   dispose(): void {
     try {
+      // Stop animation
       this.stopAnimation();
+
+      // Dispose components
       this.stateMonitor.dispose();
+      this.animationController.dispose();
+      this.stateAnimationBridge.dispose();
+      this.performanceOptimizer.dispose();
+
+      // Dispose VS Code status bar item
       this.statusBarItem.dispose();
-      
+
+      this.isInitialized = false;
       console.log('[StatusBarCharacterVSCode] Disposed successfully');
     } catch (error) {
       this.errorHandler.handleError(error as Error, ErrorContext.DOM_MANIPULATION, {
@@ -106,39 +117,71 @@ export class StatusBarCharacterVSCode implements IStatusBarCharacter {
     }
   }
 
-  private setupStatusBarItem(): void {
-    // 初期表示設定
-    this.statusBarItem.text = '👻';
-    this.statusBarItem.tooltip = 'Kiro Status Character - Click to open settings';
+  private async loadVSCodeSettings(): Promise<void> {
+    const config = vscode.workspace.getConfiguration('kiro-chan');
     
-    // クリック時の動作
-    this.statusBarItem.command = 'kiro-chan.openSettings';
+    const enabled = config.get<boolean>('enabled', true);
+    const animationSpeed = config.get<number>('animationSpeed', 1.0);
+    
+    this.settingsManager.setEnabled(enabled);
+    this.settingsManager.setAnimationSpeed(animationSpeed);
+    
+    // Listen for configuration changes
+    vscode.workspace.onDidChangeConfiguration((event) => {
+      if (event.affectsConfiguration('kiro-chan')) {
+        this.onConfigurationChanged();
+      }
+    });
   }
 
-  private setupStateMonitoring(): void {
+  private onConfigurationChanged(): void {
+    const config = vscode.workspace.getConfiguration('kiro-chan');
+    
+    const enabled = config.get<boolean>('enabled', true);
+    const animationSpeed = config.get<number>('animationSpeed', 1.0);
+    
+    this.settingsManager.setEnabled(enabled);
+    this.settingsManager.setAnimationSpeed(animationSpeed);
+    this.animationController.setAnimationSpeed(animationSpeed);
+    
+    if (enabled) {
+      this.show();
+    } else {
+      this.hide();
+    }
+  }
+
+  private initializeComponents(): void {
+    this.animationController.setAnimationSpeed(this.settingsManager.getAnimationSpeed());
+  }
+
+  private startServices(): void {
+    this.performanceOptimizer.monitorPerformance();
+    this.stateMonitor.startMonitoring();
+    
+    // Set up state change handler
     this.stateMonitor.onStateChange((state: KiroState) => {
-      this.currentState = state;
-      this.updateDisplay();
+      this.updateStatusBarText(state);
     });
   }
 
   private startAnimation(): void {
-    if (this.animationTimer) {
+    if (this.animationInterval) {
       return;
     }
 
-    const animationSpeed = this.settingsManager.getAnimationSpeed();
-    const interval = Math.max(500, 2000 / animationSpeed); // 最小500ms間隔
+    const frameRate = Math.max(15, this.performanceOptimizer.getOptimalFrameRate());
+    const frameTime = 1000 / frameRate;
 
-    this.animationTimer = setInterval(() => {
+    this.animationInterval = setInterval(() => {
       this.updateAnimationFrame();
-    }, interval);
+    }, frameTime);
   }
 
   private stopAnimation(): void {
-    if (this.animationTimer) {
-      clearInterval(this.animationTimer);
-      this.animationTimer = null;
+    if (this.animationInterval) {
+      clearInterval(this.animationInterval);
+      this.animationInterval = null;
     }
   }
 
@@ -147,92 +190,153 @@ export class StatusBarCharacterVSCode implements IStatusBarCharacter {
       return;
     }
 
-    const characters = this.characters[this.currentState];
-    this.animationFrame = (this.animationFrame + 1) % characters.length;
-    
-    this.updateDisplay();
+    this.currentAnimationFrame++;
+    const currentState = this.stateMonitor.getCurrentState();
+    this.updateStatusBarText(currentState);
   }
 
-  private updateDisplay(): void {
-    const characters = this.characters[this.currentState];
-    const currentChar = characters[this.animationFrame % characters.length];
+  private updateStatusBarText(state: KiroState): void {
+    const character = this.getAnimatedCharacter(state);
+    const stateText = this.getStateText(state);
     
-    // 状態に応じたツールチップ
-    const stateNames = {
-      [KiroState.IDLE]: 'アイドル',
-      [KiroState.EXECUTING]: '実行中',
-      [KiroState.ERROR]: 'エラー'
-    };
+    this.statusBarItem.text = `${character} Kiro`;
+    this.statusBarItem.tooltip = `Kiro Character (${stateText}) - Click to open settings`;
+  }
+
+  private getAnimatedCharacter(state: KiroState): string {
+    const baseCharacter = '👻';
     
-    this.statusBarItem.text = currentChar;
-    this.statusBarItem.tooltip = `Kiro Status Character - ${stateNames[this.currentState]}`;
+    // Simple text-based animation by rotating through variations
+    const frame = this.currentAnimationFrame % 4;
     
-    // 状態に応じた色設定（VS Codeテーマカラーを使用）
-    switch (this.currentState) {
+    switch (state) {
       case KiroState.IDLE:
-        this.statusBarItem.color = undefined; // デフォルト色
-        break;
+        // Gentle animation - slower changes
+        return frame < 2 ? '👻' : '🌟';
+        
       case KiroState.EXECUTING:
-        this.statusBarItem.color = new vscode.ThemeColor('statusBarItem.prominentForeground');
-        break;
+        // Active animation - faster changes
+        const activeChars = ['👻', '⚡', '🔥', '✨'];
+        return activeChars[frame];
+        
       case KiroState.ERROR:
-        this.statusBarItem.color = new vscode.ThemeColor('statusBarItem.errorForeground');
-        break;
+        // Error animation - warning indicators
+        return frame % 2 === 0 ? '👻' : '⚠️';
+        
+      default:
+        return baseCharacter;
     }
   }
 
-  // 設定変更時の更新
-  refreshSettings(): void {
-    this.settingsManager.loadSettings().then(() => {
-      if (this.settingsManager.isEnabled()) {
-        this.show();
-      } else {
-        this.hide();
-      }
-      
-      // アニメーション速度が変更された場合、再起動
-      this.stopAnimation();
-      if (this.settingsManager.isEnabled()) {
-        this.startAnimation();
-      }
-    }).catch(error => {
-      this.errorHandler.handleError(error as Error, ErrorContext.SETTINGS, {
-        action: 'refresh'
-      });
-    });
+  private getStateText(state: KiroState): string {
+    switch (state) {
+      case KiroState.IDLE:
+        return 'Idle';
+      case KiroState.EXECUTING:
+        return 'Active';
+      case KiroState.ERROR:
+        return 'Error';
+      default:
+        return 'Unknown';
+    }
   }
 
-  // 公開メソッド（テスト用）
+  private setupErrorHandling(): void {
+    // Set up error recovery event listeners
+    if (typeof globalThis !== 'undefined') {
+      // Use globalThis instead of window in VS Code extension context
+      const eventTarget = globalThis as any;
+      
+      if (eventTarget.addEventListener) {
+        eventTarget.addEventListener('kiro-character:enable-minimal-mode', () => {
+          this.enableMinimalMode();
+        });
+
+        eventTarget.addEventListener('kiro-character:fallback-static-display', () => {
+          this.fallbackToStaticDisplay();
+        });
+
+        eventTarget.addEventListener('kiro-character:reduce-animation-complexity', () => {
+          this.reduceAnimationComplexity();
+        });
+
+        eventTarget.addEventListener('kiro-character:use-default-settings', () => {
+          this.useDefaultSettings();
+        });
+      }
+    }
+  }
+
+  private enableMinimalMode(): void {
+    try {
+      console.log('[StatusBarCharacterVSCode] Enabling minimal mode');
+      this.stopAnimation();
+      this.statusBarItem.text = '👻 Kiro';
+    } catch (error) {
+      console.error('[StatusBarCharacterVSCode] Failed to enable minimal mode:', error);
+    }
+  }
+
+  private fallbackToStaticDisplay(): void {
+    try {
+      console.log('[StatusBarCharacterVSCode] Falling back to static display');
+      this.stopAnimation();
+      this.statusBarItem.text = '👻 Kiro (Static)';
+    } catch (error) {
+      console.error('[StatusBarCharacterVSCode] Failed to fallback to static display:', error);
+    }
+  }
+
+  private reduceAnimationComplexity(): void {
+    try {
+      console.log('[StatusBarCharacterVSCode] Reducing animation complexity');
+      this.animationController.setAnimationSpeed(0.5);
+      this.performanceOptimizer.adjustPerformance();
+    } catch (error) {
+      console.error('[StatusBarCharacterVSCode] Failed to reduce animation complexity:', error);
+    }
+  }
+
+  private useDefaultSettings(): void {
+    try {
+      console.log('[StatusBarCharacterVSCode] Using default settings');
+      this.settingsManager = new SettingsManager();
+      this.onConfigurationChanged();
+    } catch (error) {
+      console.error('[StatusBarCharacterVSCode] Failed to use default settings:', error);
+    }
+  }
+
+  // Public methods for external control
+  refreshSettings(): void {
+    this.onConfigurationChanged();
+  }
+
+  isVisible(): boolean {
+    return this.settingsManager.isEnabled();
+  }
+
   getStatusBarItem(): vscode.StatusBarItem {
     return this.statusBarItem;
   }
 
-  getSettingsManager(): SettingsManagerVSCode {
+  getSettingsManager(): SettingsManager {
     return this.settingsManager;
+  }
+
+  getAnimationController(): AnimationController {
+    return this.animationController;
   }
 
   getStateMonitor(): StateMonitor {
     return this.stateMonitor;
   }
 
+  getPerformanceOptimizer(): PerformanceOptimizer {
+    return this.performanceOptimizer;
+  }
+
   getErrorHandler(): ErrorHandler {
     return this.errorHandler;
-  }
-
-  getCurrentState(): KiroState {
-    return this.currentState;
-  }
-
-  isVisible(): boolean {
-    // VS CodeのStatusBarItemには直接的な可視性チェックがないため、
-    // 設定から判断
-    return this.settingsManager.isEnabled();
-  }
-
-  private setupConfigurationWatcher(): void {
-    // VS Code設定変更の監視
-    this.settingsManager.onConfigurationChanged(() => {
-      this.refreshSettings();
-    });
   }
 }
