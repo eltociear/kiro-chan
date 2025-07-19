@@ -13,6 +13,17 @@ Kiro のステータスバーに常駐する動的キャラクター（👻）�
 
 ## インストール
 
+### VS Code 拡張機能として使用（推奨）
+
+1. `kiro-chan-1.0.0.vsix` ファイルをダウンロード
+2. VS Code で以下のコマンドを実行:
+   ```bash
+   code --install-extension kiro-chan-1.0.0.vsix
+   ```
+   または、VS Code 内で `Ctrl+Shift+P` → `Extensions: Install from VSIX...` を選択
+
+### 開発者向けインストール
+
 1. プロジェクトをクローンまたはダウンロード
 2. 依存関係をインストール:
    ```bash
@@ -22,27 +33,34 @@ Kiro のステータスバーに常駐する動的キャラクター（👻）�
    ```bash
    npm run build
    ```
+4. 拡張機能をパッケージ:
+   ```bash
+   npx vsce package
+   ```
 
 ## 使用方法
 
-### 基本的な使用
+### VS Code 拡張機能として使用
+
+1. **自動起動**: VS Code 起動時に自動的にステータスバーに 👻 キャラクターが表示されます
+
+2. **設定変更**:
+
+   - `Ctrl+Shift+P` → `Preferences: Open Settings (UI)`
+   - `kiro-chan` で検索
+   - または、ステータスバーのキャラクターをクリック
+
+3. **手動状態変更**（デバッグ用）:
+   - `Ctrl+Shift+P` → `Kiro Chan: Set Idle State`
+   - `Ctrl+Shift+P` → `Kiro Chan: Set Active State`
+   - `Ctrl+Shift+P` → `Kiro Chan: Set Error State`
+
+### プログラムでの使用
 
 ```typescript
-import { activate, deactivate } from "./src/extension";
+import * as vscode from "vscode";
 
-// 拡張機能を有効化
-await activate();
-
-// 拡張機能を無効化
-deactivate();
-```
-
-### 設定のカスタマイズ
-
-```typescript
-import { StatusBarCharacter } from "./src/StatusBarCharacter";
-
-const character = new StatusBarCharacter();
+// 拡張機能のactivate関数内で自動的に初期化されます
 await character.initialize();
 
 // 設定UI を表示

@@ -2,7 +2,7 @@
   "name": "kiro-chan",
   "displayName": "Kiro-Chan",
   "engines": {
-    "vscode": "^1.70.0"
+    "vscode": "^1.102.0"
   },
   "categories": [
     "Other"
@@ -10,7 +10,47 @@
   "activationEvents": [
     "onStartupFinished"
   ],
-  "contributes": {},
+  "contributes": {
+    "commands": [
+      {
+        "command": "kiro-chan.openSettings",
+        "title": "Open Settings",
+        "category": "Kiro Chan"
+      },
+      {
+        "command": "kiro-chan.setIdle",
+        "title": "Set Idle State",
+        "category": "Kiro Chan"
+      },
+      {
+        "command": "kiro-chan.setActive",
+        "title": "Set Active State",
+        "category": "Kiro Chan"
+      },
+      {
+        "command": "kiro-chan.setError",
+        "title": "Set Error State",
+        "category": "Kiro Chan"
+      }
+    ],
+    "configuration": {
+      "title": "Kiro Chan",
+      "properties": {
+        "kiro-chan.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable/disable the Kiro character in status bar"
+        },
+        "kiro-chan.animationSpeed": {
+          "type": "number",
+          "default": 1.0,
+          "minimum": 0.1,
+          "maximum": 3.0,
+          "description": "Animation speed multiplier"
+        }
+      }
+    }
+  },
   "publisher": "your-publisher-id",
   "version": "1.0.0",
   "description": "Kiroのステータスバーに常駐するキャラクター拡張機能",
