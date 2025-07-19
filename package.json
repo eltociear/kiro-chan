@@ -2,7 +2,7 @@
   "name": "kiro-chan",
   "displayName": "Kiro-Chan",
   "engines": {
-    "vscode": "^1.102.0"
+    "vscode": "^1.94.0"
   },
   "categories": [
     "Other"
@@ -43,15 +43,15 @@
         },
         "kiro-chan.animationSpeed": {
           "type": "number",
-          "default": 1.0,
+          "default": 1,
           "minimum": 0.1,
-          "maximum": 3.0,
+          "maximum": 3,
           "description": "Animation speed multiplier"
         }
       }
     }
   },
-  "publisher": "your-publisher-id",
+  "publisher": "kiro-team",
   "version": "1.0.0",
   "description": "Kiroのステータスバーに常駐するキャラクター拡張機能",
   "repository": "https://github.com/eltociear/kiro-chan.git",
@@ -74,7 +74,7 @@
   "devDependencies": {
     "@types/jest": "^29.5.0",
     "@types/node": "^18.0.0",
-    "@types/vscode": "^1.102.0",
+    "@types/vscode": "^1.94.0",
     "jest": "^29.5.0",
     "jest-environment-jsdom": "^29.7.0",
     "ts-jest": "^29.1.0",
