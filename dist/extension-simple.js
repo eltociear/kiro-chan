@@ -36,11 +36,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.activate = activate;
 exports.deactivate = deactivate;
 const vscode = __importStar(require("vscode"));
+const NotificationManager_1 = require("./notifications/NotificationManager");
+const KiroTaskMonitor_1 = require("./monitoring/KiroTaskMonitor");
 let statusBarItem;
 let animationTimer;
 let animationFrame = 0;
+let notificationManager;
+let taskMonitor;
 function activate(context) {
     console.log('🚀 Kiro-Chan extension is activating...');
+    // Initialize notification and monitoring systems
+    notificationManager = new NotificationManager_1.NotificationManager();
+    taskMonitor = new KiroTaskMonitor_1.KiroTaskMonitor(notificationManager);
     // Create status bar item immediately
     statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
     statusBarItem.command = 'kiro-chan.openSettings';
@@ -49,8 +56,12 @@ function activate(context) {
     statusBarItem.text = '👻 Kiro';
     statusBarItem.show();
     console.log('✅ Status bar item created and shown');
+    // Start monitoring for task completion
+    taskMonitor.startMonitoring();
     // Start simple animation
     startAnimation();
+    // Listen for sound events for visual feedback
+    setupSoundVisualFeedback();
     // Register commands
     const openSettingsCommand = vscode.commands.registerCommand('kiro-chan.openSettings', () => {
         vscode.window.showInformationMessage('Kiro-Chan Settings (placeholder)');
@@ -68,8 +79,30 @@ function activate(context) {
         statusBarItem.text = '⚠️ Kiro (Error)';
         vscode.window.showInformationMessage('Kiro: Error state');
     });
+    // Task completion command
+    const taskCompletedCommand = vscode.commands.registerCommand('kiro-chan.taskCompleted', async () => {
+        await taskMonitor.markTaskCompleted('Manual Task');
+        statusBarItem.text = '🎉 Kiro (Completed)';
+    });
+    // Test notification command
+    const testNotificationCommand = vscode.commands.registerCommand('kiro-chan.testNotification', async () => {
+        await notificationManager.testNotification();
+    });
+    // Additional test commands for different scenarios
+    const testWorkSessionCommand = vscode.commands.registerCommand('kiro-chan.testWorkSession', async () => {
+        await taskMonitor.completeWorkSession(25); // 25-minute Pomodoro session
+    });
+    const testMilestoneCommand = vscode.commands.registerCommand('kiro-chan.testMilestone', async () => {
+        await taskMonitor.celebrateMilestone('100 commits reached! 🚀');
+    });
+    // Listen for configuration changes
+    vscode.workspace.onDidChangeConfiguration((event) => {
+        if (event.affectsConfiguration('kiro-chan')) {
+            notificationManager.updateSettings();
+        }
+    });
     // Add to subscriptions
-    context.subscriptions.push(statusBarItem, openSettingsCommand, setIdleCommand, setActiveCommand, setErrorCommand);
+    context.subscriptions.push(statusBarItem, openSettingsCommand, setIdleCommand, setActiveCommand, setErrorCommand, taskCompletedCommand, testNotificationCommand, testWorkSessionCommand, testMilestoneCommand, { dispose: () => taskMonitor.dispose() }, { dispose: () => notificationManager.dispose() });
     console.log('✅ Kiro-Chan extension activated successfully!');
 }
 function startAnimation() {
@@ -83,6 +116,43 @@ function startAnimation() {
         statusBarItem.text = `${currentChar} Kiro`;
     }, 1000); // 1 second intervals
 }
+function setupSoundVisualFeedback() {
+    // Listen for sound events to provide visual feedback
+    if (typeof globalThis !== 'undefined' && globalThis.addEventListener) {
+        globalThis.addEventListener('kiro-sound-played', (event) => {
+            const soundType = event.detail?.type;
+            showSoundVisualFeedback(soundType);
+        });
+    }
+}
+function showSoundVisualFeedback(soundType) {
+    if (!statusBarItem)
+        return;
+    const originalText = statusBarItem.text;
+    // Show visual feedback based on sound type
+    switch (soundType) {
+        case 'success':
+            statusBarItem.text = '✅ Kiro';
+            break;
+        case 'completion':
+            statusBarItem.text = '🎉 Kiro';
+            break;
+        case 'notification':
+            statusBarItem.text = '🔔 Kiro';
+            break;
+        case 'celebration':
+            statusBarItem.text = '🎊 Kiro';
+            break;
+        default:
+            statusBarItem.text = '🔊 Kiro';
+    }
+    // Restore original text after a short delay
+    setTimeout(() => {
+        if (statusBarItem) {
+            statusBarItem.text = originalText;
+        }
+    }, 2000);
+}
 function deactivate() {
     console.log('🛑 Kiro-Chan extension is deactivating...');
     if (animationTimer) {
@@ -91,6 +161,12 @@ function deactivate() {
     }
     if (statusBarItem) {
         statusBarItem.dispose();
+    }
+    if (taskMonitor) {
+        taskMonitor.dispose();
+    }
+    if (notificationManager) {
+        notificationManager.dispose();
     }
     console.log('✅ Kiro-Chan extension deactivated');
 }

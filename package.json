@@ -31,6 +31,26 @@
         "command": "kiro-chan.setError",
         "title": "Set Error State",
         "category": "Kiro Chan"
+      },
+      {
+        "command": "kiro-chan.taskCompleted",
+        "title": "Task Completed",
+        "category": "Kiro Chan"
+      },
+      {
+        "command": "kiro-chan.testNotification",
+        "title": "Test Notification & Sound",
+        "category": "Kiro Chan"
+      },
+      {
+        "command": "kiro-chan.testWorkSession",
+        "title": "Test Work Session Complete",
+        "category": "Kiro Chan"
+      },
+      {
+        "command": "kiro-chan.testMilestone",
+        "title": "Test Milestone Celebration",
+        "category": "Kiro Chan"
       }
     ],
     "configuration": {
@@ -47,6 +67,23 @@
           "minimum": 0.1,
           "maximum": 3,
           "description": "Animation speed multiplier"
+        },
+        "kiro-chan.notificationEnabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show notification when Kiro task is completed"
+        },
+        "kiro-chan.soundEnabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Play sound when Kiro task is completed"
+        },
+        "kiro-chan.soundVolume": {
+          "type": "number",
+          "default": 0.5,
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Sound volume (0.0 to 1.0)"
         }
       }
     }
