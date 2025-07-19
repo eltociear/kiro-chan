@@ -1,0 +1,154 @@
+/* Kiro Status Character Styles */
+.kiro-character {
+  display: inline-block;
+  font-size: 16px;
+  line-height: 1;
+  user-select: none;
+  pointer-events: none;
+  position: relative;
+  z-index: 1000;
+  margin: 0 4px;
+  transition: opacity 0.3s ease;
+}
+
+.kiro-character.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.kiro-character.visible {
+  opacity: 1;
+}
+
+/* Position variants */
+.kiro-character.position-left {
+  order: -1;
+}
+
+.kiro-character.position-right {
+  order: 1;
+}
+
+/* Size variants for responsive design */
+.kiro-character.size-small {
+  font-size: 12px;
+}
+
+.kiro-character.size-medium {
+  font-size: 16px;
+}
+
+.kiro-character.size-large {
+  font-size: 20px;
+}
+
+/* Animation state classes */
+.kiro-character.idle {
+  /* Gentle floating - handled by JavaScript */
+}
+
+.kiro-character.active {
+  /* Energetic bouncing - handled by JavaScript */
+}
+
+.kiro-character.error {
+  /* Shaking animation - handled by JavaScript */
+  color: #ff6b6b;
+}
+
+/* Fallback CSS animations for when JavaScript is disabled */
+@media (prefers-reduced-motion: no-preference) {
+  .kiro-character.idle.css-fallback {
+    animation: gentle-float 2s ease-in-out infinite;
+  }
+
+  .kiro-character.active.css-fallback {
+    animation: energetic-bounce 1s ease-in-out infinite;
+  }
+
+  .kiro-character.error.css-fallback {
+    animation: error-shake 0.1s linear infinite;
+  }
+}
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .kiro-character {
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
+/* Keyframe animations for CSS fallback */
+@keyframes gentle-float {
+  0%, 100% { 
+    transform: translateY(0px) rotate(0deg); 
+  }
+  50% { 
+    transform: translateY(-2px) rotate(1deg); 
+  }
+}
+
+@keyframes energetic-bounce {
+  0%, 100% { 
+    transform: translateY(0px) scale(1); 
+  }
+  50% { 
+    transform: translateY(-4px) scale(1.1); 
+  }
+}
+
+@keyframes error-shake {
+  0%, 100% { 
+    transform: translateX(0px); 
+  }
+  25% { 
+    transform: translateX(-2px); 
+  }
+  75% { 
+    transform: translateX(2px); 
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .kiro-character.error {
+    color: #ff0000;
+    text-shadow: 0 0 2px #ffffff;
+  }
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+  .kiro-character {
+    filter: brightness(0.9);
+  }
+  
+  .kiro-character.error {
+    color: #ff8a8a;
+  }
+}
+
+/* Status bar integration styles */
+.status-bar .kiro-character {
+  vertical-align: middle;
+  margin: 0 2px;
+}
+
+/* Ensure character doesn't interfere with other status bar items */
+.status-bar .kiro-character + .status-bar-item,
+.status-bar .status-bar-item + .kiro-character {
+  margin-left: 4px;
+}
+
+/* Responsive behavior for narrow status bars */
+@media (max-width: 768px) {
+  .kiro-character.responsive-hide {
+    display: none;
+  }
+  
+  .kiro-character:not(.responsive-hide) {
+    font-size: 14px;
+    margin: 0 2px;
+  }
+}
