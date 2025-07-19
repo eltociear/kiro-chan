@@ -1,43 +1,47 @@
 import * as vscode from 'vscode';
-import { StatusBarCharacterVSCode } from './StatusBarCharacterVSCode';
-import { ErrorHandler } from './error/ErrorHandler';
+import { KiroState } from './types';
 
-let statusBarCharacter: StatusBarCharacterVSCode | null = null;
+let statusBarItem: vscode.StatusBarItem | null = null;
+let animationInterval: NodeJS.Timeout | null = null;
+let currentState: KiroState = KiroState.IDLE;
+let animationFrame: number = 0;
 
 // Extension entry point
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
   try {
     console.log('[Extension] Kiro Status Character extension activating...');
     
+    // Create status bar item immediately
+    statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+    statusBarItem.command = 'kiro-chan.openSettings';
+    statusBarItem.tooltip = 'Kiro Character - Click to open settings';
+    
+    // Show immediately with default state
+    updateStatusBar();
+    statusBarItem.show();
+    
+    // Start animation
+    startAnimation();
+    
     // Register commands
     registerCommands(context);
     
-    // Create and initialize the status bar character
-    statusBarCharacter = new StatusBarCharacterVSCode();
-    await statusBarCharacter.initialize();
-    
     // Add to subscriptions for proper cleanup
-    context.subscriptions.push({
-      dispose: () => {
-        if (statusBarCharacter) {
-          statusBarCharacter.dispose();
-        }
+    context.subscriptions.push(statusBarItem);
+    
+    // Listen for configuration changes
+    const configWatcher = vscode.workspace.onDidChangeConfiguration((event) => {
+      if (event.affectsConfiguration('kiro-chan')) {
+        handleConfigurationChange();
       }
     });
+    context.subscriptions.push(configWatcher);
     
     console.log('[Extension] Kiro Status Character extension activated successfully');
+    vscode.window.showInformationMessage('👻 Kiro Character is now active in the status bar!');
   } catch (error) {
     console.error('[Extension] Failed to activate Kiro Status Character extension:', error);
-    ErrorHandler.handleInitializationError(error as Error, {
-      phase: 'activation'
-    });
-    
-    // Don't throw the error to prevent extension system issues
-    // Instead, log it and continue with minimal functionality
-    if (statusBarCharacter) {
-      statusBarCharacter.dispose();
-      statusBarCharacter = null;
-    }
+    vscode.window.showErrorMessage(`Kiro Character activation failed: ${error}`);
   }
 }
 
@@ -45,41 +49,126 @@ export function deactivate(): void {
   try {
     console.log('[Extension] Kiro Status Character extension deactivating...');
     
-    if (statusBarCharacter) {
-      statusBarCharacter.dispose();
-      statusBarCharacter = null;
+    // Stop animation
+    if (animationInterval) {
+      clearInterval(animationInterval);
+      animationInterval = null;
     }
     
-    // Clear error handler instance
-    ErrorHandler.resetInstance();
+    // Dispose status bar item
+    if (statusBarItem) {
+      statusBarItem.dispose();
+      statusBarItem = null;
+    }
     
     console.log('[Extension] Kiro Status Character extension deactivated successfully');
   } catch (error) {
     console.error('[Extension] Error during deactivation:', error);
-    // Don't throw during deactivation to avoid system issues
   }
 }
 
-// Export the status bar character instance for testing/debugging
-export function getStatusBarCharacter(): StatusBarCharacterVSCode | null {
-  return statusBarCharacter;
+// Animation and state management functions
+function updateStatusBar(): void {
+  if (!statusBarItem) return;
+  
+  const character = getAnimatedCharacter();
+  const stateText = getStateText();
+  
+  statusBarItem.text = `${character} Kiro`;
+  statusBarItem.tooltip = `Kiro Character (${stateText}) - Click to open settings`;
 }
 
-// Utility function to check if extension is active
+function getAnimatedCharacter(): string {
+  const frame = animationFrame % 8;
+  
+  switch (currentState) {
+    case KiroState.IDLE:
+      // Gentle animation - slower changes
+      if (frame < 4) return '👻';
+      else if (frame < 6) return '🌟';
+      else return '✨';
+      
+    case KiroState.EXECUTING:
+      // Active animation - faster changes
+      const activeChars = ['👻', '⚡', '🔥', '✨', '🚀', '💫', '⭐', '🌟'];
+      return activeChars[frame];
+      
+    case KiroState.ERROR:
+      // Error animation - warning indicators
+      return frame % 2 === 0 ? '👻' : '⚠️';
+      
+    default:
+      return '👻';
+  }
+}
+
+function getStateText(): string {
+  switch (currentState) {
+    case KiroState.IDLE:
+      return 'Idle';
+    case KiroState.EXECUTING:
+      return 'Active';
+    case KiroState.ERROR:
+      return 'Error';
+    default:
+      return 'Unknown';
+  }
+}
+
+function startAnimation(): void {
+  if (animationInterval) return;
+  
+  const config = vscode.workspace.getConfiguration('kiro-chan');
+  const enabled = config.get<boolean>('enabled', true);
+  const speed = config.get<number>('animationSpeed', 1.0);
+  
+  if (!enabled) return;
+  
+  const frameRate = Math.max(1, Math.min(10, speed * 2)); // 1-10 fps
+  const frameTime = 1000 / frameRate;
+  
+  animationInterval = setInterval(() => {
+    animationFrame++;
+    updateStatusBar();
+  }, frameTime);
+}
+
+function stopAnimation(): void {
+  if (animationInterval) {
+    clearInterval(animationInterval);
+    animationInterval = null;
+  }
+}
+
+function handleConfigurationChange(): void {
+  const config = vscode.workspace.getConfiguration('kiro-chan');
+  const enabled = config.get<boolean>('enabled', true);
+  
+  if (enabled) {
+    if (statusBarItem) {
+      statusBarItem.show();
+      startAnimation();
+    }
+  } else {
+    if (statusBarItem) {
+      statusBarItem.hide();
+      stopAnimation();
+    }
+  }
+}
+
+// Utility functions
 export function isActive(): boolean {
-  return statusBarCharacter !== null;
+  return statusBarItem !== null;
 }
 
-// Utility function to restart the extension
-export async function restart(context?: vscode.ExtensionContext): Promise<void> {
-  console.log('[Extension] Restarting Kiro Status Character extension...');
-  
-  deactivate();
-  await new Promise(resolve => setTimeout(resolve, 100)); // Small delay
-  
-  if (context) {
-    await activate(context);
-  }
+export function getCurrentState(): KiroState {
+  return currentState;
+}
+
+export function setCurrentState(state: KiroState): void {
+  currentState = state;
+  updateStatusBar();
 }
 
 // Register commands
@@ -91,24 +180,18 @@ function registerCommands(context: vscode.ExtensionContext): void {
 
   // 状態を手動で変更するコマンド（デバッグ用）
   const setIdleCommand = vscode.commands.registerCommand('kiro-chan.setIdle', () => {
-    if (statusBarCharacter) {
-      statusBarCharacter.updateState(require('./types').KiroState.IDLE);
-      vscode.window.showInformationMessage('Kiro Character: Idle state');
-    }
+    setCurrentState(KiroState.IDLE);
+    vscode.window.showInformationMessage('👻 Kiro Character: Idle state');
   });
 
   const setActiveCommand = vscode.commands.registerCommand('kiro-chan.setActive', () => {
-    if (statusBarCharacter) {
-      statusBarCharacter.updateState(require('./types').KiroState.EXECUTING);
-      vscode.window.showInformationMessage('Kiro Character: Active state');
-    }
+    setCurrentState(KiroState.EXECUTING);
+    vscode.window.showInformationMessage('⚡ Kiro Character: Active state');
   });
 
   const setErrorCommand = vscode.commands.registerCommand('kiro-chan.setError', () => {
-    if (statusBarCharacter) {
-      statusBarCharacter.updateState(require('./types').KiroState.ERROR);
-      vscode.window.showInformationMessage('Kiro Character: Error state');
-    }
+    setCurrentState(KiroState.ERROR);
+    vscode.window.showInformationMessage('⚠️ Kiro Character: Error state');
   });
 
   context.subscriptions.push(
