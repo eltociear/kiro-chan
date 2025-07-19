@@ -30,12 +30,13 @@ Object.defineProperty(global, 'performance', {
 
 // Mock requestAnimationFrame and cancelAnimationFrame
 global.requestAnimationFrame = jest.fn((callback: FrameRequestCallback) => {
-  return setTimeout(() => callback(Date.now()), 16);
-});
+  setTimeout(() => callback(Date.now()), 16);
+  return 1; // Return a number as expected
+}) as jest.MockedFunction<typeof requestAnimationFrame>;
 
-global.cancelAnimationFrame = jest.fn((id) => {
-  clearTimeout(id);
-});
+global.cancelAnimationFrame = jest.fn((id: number) => {
+  // Mock implementation
+}) as jest.MockedFunction<typeof cancelAnimationFrame>;
 
 // Mock localStorage
 const localStorageMock = {
