@@ -64,7 +64,7 @@
     "animation",
     "productivity"
   ],
-  "main": "dist/extension.js",
+  "main": "dist/extension-simple.js",
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
