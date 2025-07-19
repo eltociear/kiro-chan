@@ -1,97 +1,112 @@
 # Implementation Plan
 
 - [x] 1. プロジェクト構造とコアインターフェースの設定
+
   - 拡張機能のディレクトリ構造を作成（src/、types/、styles/、tests/）
-  - TypeScriptの型定義ファイルを作成
-  - package.jsonと必要な依存関係を設定
+  - TypeScript の型定義ファイルを作成
+  - package.json と必要な依存関係を設定
   - _Requirements: 1.1, 2.1_
 
 - [ ] 2. 基本データモデルとインターフェースの実装
 - [x] 2.1 コアインターフェースと型定義の作成
-  - IStatusBarCharacter、IAnimationController等のインターフェースを定義
-  - KiroState、AnimationPattern、CharacterSettingsの型を実装
-  - CharacterStateとAnimationFrameのデータモデルを作成
+
+  - IStatusBarCharacter、IAnimationController 等のインターフェースを定義
+  - KiroState、AnimationPattern、CharacterSettings の型を実装
+  - CharacterState と AnimationFrame のデータモデルを作成
   - _Requirements: 1.1, 5.1, 5.2, 5.3_
 
 - [x] 2.2 設定管理システムの実装
-  - SettingsManagerクラスを実装
+
+  - SettingsManager クラスを実装
   - 設定の保存/読み込み機能を作成
   - デフォルト設定とバリデーション機能を実装
   - 設定管理のユニットテストを作成
   - _Requirements: 4.1, 4.2, 4.3_
 
 - [ ] 3. アニメーション制御システムの実装
-- [x] 3.1 AnimationControllerクラスの作成
+- [x] 3.1 AnimationController クラスの作成
+
   - 基本的なアニメーション制御ロジックを実装
-  - requestAnimationFrameを使用したアニメーションループを作成
+  - requestAnimationFrame を使用したアニメーションループを作成
   - アニメーションパターンの切り替え機能を実装
   - _Requirements: 1.2, 5.1, 5.2, 5.3_
 
-- [x] 3.2 CSSアニメーションスタイルの実装
+- [x] 3.2 CSS アニメーションスタイルの実装
+
   - 基本的なキャラクター表示スタイルを作成
   - アイドル、アクティブ、エラー状態のアニメーションを定義
   - レスポンシブ対応とサイズ調整のスタイルを実装
   - _Requirements: 1.2, 2.1, 2.2, 5.1, 5.2, 5.3_
 
 - [x] 3.3 アニメーションコントローラーのテスト作成
+
   - アニメーションパターン切り替えのテストを実装
   - フレームレート制御のテストを作成
   - アニメーション開始/停止のテストを実装
   - _Requirements: 1.2, 5.1, 5.2, 5.3_
 
 - [ ] 4. 状態監視システムの実装
-- [x] 4.1 StateMonitorクラスの作成
-  - Kiroの状態変化を監視する機能を実装
+- [x] 4.1 StateMonitor クラスの作成
+
+  - Kiro の状態変化を監視する機能を実装
   - 状態変化コールバックシステムを作成
-  - 状態変化イベントのthrottle/debounce処理を実装
+  - 状態変化イベントの throttle/debounce 処理を実装
   - _Requirements: 5.1, 5.2, 5.3_
 
 - [x] 4.2 状態監視とアニメーション連携の実装
+
   - 状態変化時のアニメーションパターン自動切り替えを実装
   - 状態変化の遅延処理とスムーズな遷移を作成
   - 状態監視システムのユニットテストを実装
   - _Requirements: 5.1, 5.2, 5.3_
 
 - [ ] 5. パフォーマンス最適化システムの実装
-- [x] 5.1 PerformanceOptimizerクラスの作成
-  - CPU使用率とメモリ使用量の監視機能を実装
+- [x] 5.1 PerformanceOptimizer クラスの作成
+
+  - CPU 使用率とメモリ使用量の監視機能を実装
   - パフォーマンス閾値の設定と自動調整ロジックを作成
   - フレームレート動的調整機能を実装
   - _Requirements: 3.1, 3.2, 3.3_
 
 - [x] 5.2 パフォーマンス最適化の統合
-  - AnimationControllerとPerformanceOptimizerの連携を実装
+
+  - AnimationController と PerformanceOptimizer の連携を実装
   - 高負荷時のアニメーション品質自動調整を作成
   - パフォーマンス監視のユニットテストを実装
   - _Requirements: 3.1, 3.2, 3.3_
 
 - [ ] 6. メインコントローラーの実装
-- [x] 6.1 StatusBarCharacterクラスの作成
+- [x] 6.1 StatusBarCharacter クラスの作成
+
   - メインコントローラークラスの基本構造を実装
   - 各コンポーネントの初期化と統合ロジックを作成
-  - ステータスバーへのDOM要素挿入機能を実装
+  - ステータスバーへの DOM 要素挿入機能を実装
   - _Requirements: 1.1, 2.1, 2.2_
 
 - [x] 6.2 表示制御機能の実装
-  - show/hide機能とDOM操作を実装
+
+  - show/hide 機能と DOM 操作を実装
   - ステータスバー内での適切な位置決めロジックを作成
   - 他のステータスバー要素との干渉回避機能を実装
   - _Requirements: 1.1, 2.1, 2.2, 2.3_
 
 - [x] 6.3 メインコントローラーの統合テスト
+
   - 全コンポーネントの初期化テストを作成
   - 状態変化からアニメーション変更までの統合テストを実装
   - エラーハンドリングの統合テストを作成
   - _Requirements: 1.1, 1.2, 1.3_
 
 - [ ] 7. エラーハンドリングシステムの実装
-- [x] 7.1 ErrorHandlerクラスの作成
+- [x] 7.1 ErrorHandler クラスの作成
+
   - 各種エラーの分類と対応ロジックを実装
   - フォールバック機能（静的表示への切り替え）を作成
   - エラーログ記録とユーザー通知機能を実装
   - _Requirements: 3.1, 3.2_
 
 - [x] 7.2 エラーハンドリングの統合
+
   - 各コンポーネントにエラーハンドリングを統合
   - グレースフルデグラデーション機能を実装
   - エラーハンドリングのテストケースを作成
@@ -99,15 +114,17 @@
 
 - [ ] 8. 拡張機能の統合と最終調整
 - [x] 8.1 拡張機能エントリーポイントの作成
-  - 拡張機能のactivate/deactivate関数を実装
-  - Kiro拡張機能APIとの統合を完成
+
+  - 拡張機能の activate/deactivate 関数を実装
+  - Kiro 拡張機能 API との統合を完成
   - 拡張機能のライフサイクル管理を実装
   - _Requirements: 1.1, 4.1_
 
-- [x] 8.2 設定UIの実装
-  - ユーザー設定画面のUI要素を作成
+- [x] 8.2 設定 UI の実装
+
+  - ユーザー設定画面の UI 要素を作成
   - 設定変更の即座反映機能を実装
-  - 設定UIのユーザビリティテストを実行
+  - 設定 UI のユーザビリティテストを実行
   - _Requirements: 4.1, 4.2, 4.3_
 
 - [x] 8.3 最終統合テストとパフォーマンステスト

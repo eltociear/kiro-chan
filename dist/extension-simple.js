@@ -38,13 +38,17 @@ exports.deactivate = deactivate;
 const vscode = __importStar(require("vscode"));
 const NotificationManager_1 = require("./notifications/NotificationManager");
 const KiroTaskMonitor_1 = require("./monitoring/KiroTaskMonitor");
+const icons_1 = require("./utils/icons");
 let statusBarItem;
 let animationTimer;
 let animationFrame = 0;
 let notificationManager;
 let taskMonitor;
+let iconManager;
 function activate(context) {
     console.log('🚀 Kiro-Chan extension is activating...');
+    // Initialize icon manager
+    iconManager = new icons_1.IconManager(context);
     // Initialize notification and monitoring systems
     notificationManager = new NotificationManager_1.NotificationManager();
     taskMonitor = new KiroTaskMonitor_1.KiroTaskMonitor(notificationManager);
@@ -52,8 +56,8 @@ function activate(context) {
     statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
     statusBarItem.command = 'kiro-chan.openSettings';
     statusBarItem.tooltip = 'Kiro Character - Click for settings';
-    // Show immediately with basic text
-    statusBarItem.text = '👻 Kiro';
+    // Show immediately with icon (no text)
+    statusBarItem.text = iconManager.getStateIcon('idle');
     statusBarItem.show();
     console.log('✅ Status bar item created and shown');
     // Start monitoring for task completion
@@ -68,21 +72,21 @@ function activate(context) {
         vscode.commands.executeCommand('workbench.action.openSettings', 'kiro-chan');
     });
     const setIdleCommand = vscode.commands.registerCommand('kiro-chan.setIdle', () => {
-        statusBarItem.text = '👻 Kiro (Idle)';
+        statusBarItem.text = iconManager.getStateIcon('idle');
         vscode.window.showInformationMessage('Kiro: Idle state');
     });
     const setActiveCommand = vscode.commands.registerCommand('kiro-chan.setActive', () => {
-        statusBarItem.text = '⚡ Kiro (Active)';
+        statusBarItem.text = iconManager.getStateIcon('active');
         vscode.window.showInformationMessage('Kiro: Active state');
     });
     const setErrorCommand = vscode.commands.registerCommand('kiro-chan.setError', () => {
-        statusBarItem.text = '⚠️ Kiro (Error)';
+        statusBarItem.text = iconManager.getStateIcon('error');
         vscode.window.showInformationMessage('Kiro: Error state');
     });
     // Task completion command
     const taskCompletedCommand = vscode.commands.registerCommand('kiro-chan.taskCompleted', async () => {
         await taskMonitor.markTaskCompleted('Manual Task');
-        statusBarItem.text = '🎉 Kiro (Completed)';
+        statusBarItem.text = iconManager.getStateIcon('completion');
     });
     // Test notification command
     const testNotificationCommand = vscode.commands.registerCommand('kiro-chan.testNotification', async () => {
@@ -111,9 +115,9 @@ function startAnimation() {
     }
     animationTimer = setInterval(() => {
         animationFrame = (animationFrame + 1) % 4;
-        const characters = ['👻', '🌟', '✨', '💫'];
-        const currentChar = characters[animationFrame];
-        statusBarItem.text = `${currentChar} Kiro`;
+        const animationStates = iconManager.getAnimationStates();
+        const currentIcon = animationStates[animationFrame];
+        statusBarItem.text = currentIcon;
     }, 1000); // 1 second intervals
 }
 function setupSoundVisualFeedback() {
@@ -129,23 +133,8 @@ function showSoundVisualFeedback(soundType) {
     if (!statusBarItem)
         return;
     const originalText = statusBarItem.text;
-    // Show visual feedback based on sound type
-    switch (soundType) {
-        case 'success':
-            statusBarItem.text = '✅ Kiro';
-            break;
-        case 'completion':
-            statusBarItem.text = '🎉 Kiro';
-            break;
-        case 'notification':
-            statusBarItem.text = '🔔 Kiro';
-            break;
-        case 'celebration':
-            statusBarItem.text = '🎊 Kiro';
-            break;
-        default:
-            statusBarItem.text = '🔊 Kiro';
-    }
+    // Show visual feedback based on sound type using icons
+    statusBarItem.text = iconManager.getStateIcon(soundType);
     // Restore original text after a short delay
     setTimeout(() => {
         if (statusBarItem) {

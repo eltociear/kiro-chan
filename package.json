@@ -8,7 +8,7 @@
     "Other"
   ],
   "activationEvents": [
-    "*"
+    "onStartupFinished"
   ],
   "contributes": {
     "commands": [
@@ -102,6 +102,10 @@
     "productivity"
   ],
   "main": "dist/extension-simple.js",
+  "files": [
+    "dist/**/*",
+    "images/**/*"
+  ],
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",

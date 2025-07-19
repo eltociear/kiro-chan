@@ -1,15 +1,20 @@
 import * as vscode from 'vscode';
 import { NotificationManager } from './notifications/NotificationManager';
 import { KiroTaskMonitor } from './monitoring/KiroTaskMonitor';
+import { IconManager } from './utils/icons';
 
 let statusBarItem: vscode.StatusBarItem;
 let animationTimer: NodeJS.Timeout | undefined;
 let animationFrame = 0;
 let notificationManager: NotificationManager;
 let taskMonitor: KiroTaskMonitor;
+let iconManager: IconManager;
 
 export function activate(context: vscode.ExtensionContext) {
     console.log('🚀 Kiro-Chan extension is activating...');
+
+    // Initialize icon manager
+    iconManager = new IconManager(context);
 
     // Initialize notification and monitoring systems
     notificationManager = new NotificationManager();
@@ -20,8 +25,8 @@ export function activate(context: vscode.ExtensionContext) {
     statusBarItem.command = 'kiro-chan.openSettings';
     statusBarItem.tooltip = 'Kiro Character - Click for settings';
     
-    // Show immediately with basic text
-    statusBarItem.text = '👻 Kiro';
+    // Show immediately with icon (no text)
+    statusBarItem.text = iconManager.getStateIcon('idle');
     statusBarItem.show();
     
     console.log('✅ Status bar item created and shown');
@@ -42,24 +47,24 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     const setIdleCommand = vscode.commands.registerCommand('kiro-chan.setIdle', () => {
-        statusBarItem.text = '👻 Kiro (Idle)';
+        statusBarItem.text = iconManager.getStateIcon('idle');
         vscode.window.showInformationMessage('Kiro: Idle state');
     });
 
     const setActiveCommand = vscode.commands.registerCommand('kiro-chan.setActive', () => {
-        statusBarItem.text = '⚡ Kiro (Active)';
+        statusBarItem.text = iconManager.getStateIcon('active');
         vscode.window.showInformationMessage('Kiro: Active state');
     });
 
     const setErrorCommand = vscode.commands.registerCommand('kiro-chan.setError', () => {
-        statusBarItem.text = '⚠️ Kiro (Error)';
+        statusBarItem.text = iconManager.getStateIcon('error');
         vscode.window.showInformationMessage('Kiro: Error state');
     });
 
     // Task completion command
     const taskCompletedCommand = vscode.commands.registerCommand('kiro-chan.taskCompleted', async () => {
         await taskMonitor.markTaskCompleted('Manual Task');
-        statusBarItem.text = '🎉 Kiro (Completed)';
+        statusBarItem.text = iconManager.getStateIcon('completion');
     });
 
     // Test notification command
@@ -109,10 +114,10 @@ function startAnimation() {
     animationTimer = setInterval(() => {
         animationFrame = (animationFrame + 1) % 4;
         
-        const characters = ['👻', '🌟', '✨', '💫'];
-        const currentChar = characters[animationFrame];
+        const animationStates = iconManager.getAnimationStates();
+        const currentIcon = animationStates[animationFrame];
         
-        statusBarItem.text = `${currentChar} Kiro`;
+        statusBarItem.text = currentIcon;
     }, 1000); // 1 second intervals
 }
 
@@ -131,23 +136,8 @@ function showSoundVisualFeedback(soundType: string) {
 
     const originalText = statusBarItem.text;
     
-    // Show visual feedback based on sound type
-    switch (soundType) {
-        case 'success':
-            statusBarItem.text = '✅ Kiro';
-            break;
-        case 'completion':
-            statusBarItem.text = '🎉 Kiro';
-            break;
-        case 'notification':
-            statusBarItem.text = '🔔 Kiro';
-            break;
-        case 'celebration':
-            statusBarItem.text = '🎊 Kiro';
-            break;
-        default:
-            statusBarItem.text = '🔊 Kiro';
-    }
+    // Show visual feedback based on sound type using icons
+    statusBarItem.text = iconManager.getStateIcon(soundType);
     
     // Restore original text after a short delay
     setTimeout(() => {
