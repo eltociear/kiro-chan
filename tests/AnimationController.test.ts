@@ -5,9 +5,9 @@ import { AnimationPattern } from '../src/types';
 let animationFrameId = 0;
 const animationFrameCallbacks: Array<() => void> = [];
 
-global.requestAnimationFrame = jest.fn((callback: () => void) => {
+global.requestAnimationFrame = jest.fn((callback: FrameRequestCallback) => {
   const id = ++animationFrameId;
-  animationFrameCallbacks[id] = callback;
+  animationFrameCallbacks[id] = () => callback(Date.now());
   return id;
 });
 

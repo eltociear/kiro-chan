@@ -45,10 +45,12 @@
 /* Animation state classes */
 .kiro-character.idle {
   /* Gentle floating - handled by JavaScript */
+  opacity: 1;
 }
 
 .kiro-character.active {
   /* Energetic bouncing - handled by JavaScript */
+  opacity: 1;
 }
 
 .kiro-character.error {

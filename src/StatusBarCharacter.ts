@@ -1,4 +1,4 @@
-import { IStatusBarCharacter, KiroState } from './types';
+import { IStatusBarCharacter, KiroState, AnimationPattern } from './types';
 import { AnimationController } from './animation/AnimationController';
 import { StateMonitor } from './state/StateMonitor';
 import { StateAnimationBridge } from './state/StateAnimationBridge';
@@ -268,16 +268,16 @@ export class StatusBarCharacter implements IStatusBarCharacter {
     }
   }
 
-  private mapStateToAnimationPattern(state: KiroState): import('./types').AnimationPattern {
+  private mapStateToAnimationPattern(state: KiroState): AnimationPattern {
     switch (state) {
       case KiroState.IDLE:
-        return import('./types').AnimationPattern.IDLE;
+        return AnimationPattern.IDLE;
       case KiroState.EXECUTING:
-        return import('./types').AnimationPattern.ACTIVE;
+        return AnimationPattern.ACTIVE;
       case KiroState.ERROR:
-        return import('./types').AnimationPattern.ERROR;
+        return AnimationPattern.ERROR;
       default:
-        return import('./types').AnimationPattern.IDLE;
+        return AnimationPattern.IDLE;
     }
   }
 
@@ -331,9 +331,12 @@ export class StatusBarCharacter implements IStatusBarCharacter {
 
   showSettings(): void {
     // This would be called by a command or menu item
-    const { SettingsUI } = require('./ui/SettingsUI');
-    const settingsUI = new SettingsUI(this.settingsManager, this);
-    settingsUI.show();
+    import('./ui/SettingsUI').then(({ SettingsUI }) => {
+      const settingsUI = new SettingsUI(this.settingsManager, this);
+      settingsUI.show();
+    }).catch(error => {
+      console.error('[StatusBarCharacter] Failed to load settings UI:', error);
+    });
   }
 
   private setupErrorHandling(): void {

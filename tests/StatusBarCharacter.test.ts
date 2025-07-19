@@ -289,7 +289,7 @@ describe('StatusBarCharacter', () => {
       
       statusBarCharacter.dispose();
       
-      expect(mockElement.parentNode.removeChild).toHaveBeenCalledWith(mockElement);
+      expect(mockElement.parentNode?.removeChild).toHaveBeenCalledWith(mockElement);
     });
 
     test('should handle disposal errors gracefully', async () => {

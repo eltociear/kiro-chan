@@ -185,7 +185,6 @@ export class AnimationController implements IAnimationController {
     scale: number;
   } {
     // Shaking animation for error state
-    const cycle = elapsed / 100; // Fast shake
     const intensity = Math.max(0, 1 - elapsed / 3000); // Fade out over 3 seconds
     const translateX = (Math.random() - 0.5) * 4 * intensity;
     const translateY = (Math.random() - 0.5) * 2 * intensity;
@@ -214,7 +213,7 @@ export class AnimationController implements IAnimationController {
     }
   }
 
-  private restorePerformance(): void {
+  restorePerformance(): void {
     if (this.element) {
       this.element.classList.remove('css-fallback');
       this.animationSpeed = Math.min(3.0, this.animationSpeed * 1.2);

@@ -93,11 +93,11 @@ describe('StateMonitor', () => {
       stateMonitor.onStateChange(callback1);
       stateMonitor.onStateChange(callback2);
       
-      stateMonitor.forceStateChange(KiroState.ACTIVE);
+      stateMonitor.forceStateChange(KiroState.EXECUTING);
       
       setTimeout(() => {
-        expect(callback1).toHaveBeenCalledWith(KiroState.ACTIVE);
-        expect(callback2).toHaveBeenCalledWith(KiroState.ACTIVE);
+        expect(callback1).toHaveBeenCalledWith(KiroState.EXECUTING);
+        expect(callback2).toHaveBeenCalledWith(KiroState.EXECUTING);
       }, 0);
     });
 

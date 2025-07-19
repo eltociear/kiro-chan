@@ -144,7 +144,7 @@ describe('StateAnimationBridge', () => {
   });
 
   describe('Disposal', () => {
-    test('should cancel pending transitions on dispose', () => {
+    test('should cancel pending transitions on dispose', (done) => {
       stateChangeCallback(KiroState.EXECUTING);
       
       bridge.dispose();
@@ -152,6 +152,7 @@ describe('StateAnimationBridge', () => {
       // Wait for original delay
       setTimeout(() => {
         expect(mockAnimationController.startAnimation).not.toHaveBeenCalled();
+        done();
       }, 350);
     });
   });

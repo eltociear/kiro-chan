@@ -1,5 +1,5 @@
 import { StatusBarCharacter } from './StatusBarCharacter';
-import { ErrorHandler, ErrorContext } from './error/ErrorHandler';
+import { ErrorHandler } from './error/ErrorHandler';
 
 let statusBarCharacter: StatusBarCharacter | null = null;
 
