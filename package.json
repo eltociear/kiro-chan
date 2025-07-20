@@ -11,6 +11,14 @@
     "onStartupFinished"
   ],
   "contributes": {
+    "icons": {
+      "kiro-icon": {
+        "description": "Kiro character icon",
+        "default": {
+          "fontPath": "./images/kiro.svg"
+        }
+      }
+    },
     "commands": [
       {
         "command": "kiro-chan.openSettings",

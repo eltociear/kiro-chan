@@ -56,8 +56,8 @@ function activate(context) {
     statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
     statusBarItem.command = 'kiro-chan.openSettings';
     statusBarItem.tooltip = 'Kiro Character - Click for settings';
-    // Show immediately with icon (no text)
-    statusBarItem.text = iconManager.getStateIcon('idle');
+    // Show immediately with custom icon (no emojis)
+    statusBarItem.text = '$(kiro-icon) Kiro';
     statusBarItem.show();
     console.log('✅ Status bar item created and shown');
     // Start monitoring for task completion
@@ -72,21 +72,21 @@ function activate(context) {
         vscode.commands.executeCommand('workbench.action.openSettings', 'kiro-chan');
     });
     const setIdleCommand = vscode.commands.registerCommand('kiro-chan.setIdle', () => {
-        statusBarItem.text = iconManager.getStateIcon('idle');
+        statusBarItem.text = '$(kiro-icon) Kiro (Idle)';
         vscode.window.showInformationMessage('Kiro: Idle state');
     });
     const setActiveCommand = vscode.commands.registerCommand('kiro-chan.setActive', () => {
-        statusBarItem.text = iconManager.getStateIcon('active');
+        statusBarItem.text = '$(kiro-icon) Kiro (Active)';
         vscode.window.showInformationMessage('Kiro: Active state');
     });
     const setErrorCommand = vscode.commands.registerCommand('kiro-chan.setError', () => {
-        statusBarItem.text = iconManager.getStateIcon('error');
+        statusBarItem.text = '$(kiro-icon) Kiro (Error)';
         vscode.window.showInformationMessage('Kiro: Error state');
     });
     // Task completion command
     const taskCompletedCommand = vscode.commands.registerCommand('kiro-chan.taskCompleted', async () => {
         await taskMonitor.markTaskCompleted('Manual Task');
-        statusBarItem.text = iconManager.getStateIcon('completion');
+        statusBarItem.text = '$(kiro-icon) Kiro (Completed)';
     });
     // Test notification command
     const testNotificationCommand = vscode.commands.registerCommand('kiro-chan.testNotification', async () => {
@@ -113,11 +113,13 @@ function startAnimation() {
     if (animationTimer) {
         clearInterval(animationTimer);
     }
+    // No more emoji animation - just keep the same icon
+    // Optionally, we can add subtle text changes for animation
     animationTimer = setInterval(() => {
         animationFrame = (animationFrame + 1) % 4;
-        const animationStates = iconManager.getAnimationStates();
-        const currentIcon = animationStates[animationFrame];
-        statusBarItem.text = currentIcon;
+        // Subtle animation with dots instead of emojis
+        const dots = '.'.repeat((animationFrame % 3) + 1);
+        statusBarItem.text = `$(kiro-icon) Kiro${dots}`;
     }, 1000); // 1 second intervals
 }
 function setupSoundVisualFeedback() {
@@ -133,8 +135,23 @@ function showSoundVisualFeedback(soundType) {
     if (!statusBarItem)
         return;
     const originalText = statusBarItem.text;
-    // Show visual feedback based on sound type using icons
-    statusBarItem.text = iconManager.getStateIcon(soundType);
+    // Show visual feedback with text changes instead of emoji changes
+    switch (soundType) {
+        case 'success':
+            statusBarItem.text = '$(kiro-icon) Kiro [OK]';
+            break;
+        case 'completion':
+            statusBarItem.text = '$(kiro-icon) Kiro [DONE]';
+            break;
+        case 'notification':
+            statusBarItem.text = '$(kiro-icon) Kiro [INFO]';
+            break;
+        case 'celebration':
+            statusBarItem.text = '$(kiro-icon) Kiro [YAY]';
+            break;
+        default:
+            statusBarItem.text = '$(kiro-icon) Kiro [SND]';
+    }
     // Restore original text after a short delay
     setTimeout(() => {
         if (statusBarItem) {

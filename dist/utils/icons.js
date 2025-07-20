@@ -39,57 +39,37 @@ const path = __importStar(require("path"));
 class IconManager {
     constructor(context) {
         this.context = context;
+        this.iconPath = path.join(context.extensionPath, 'images', 'kiro.svg');
     }
-    // Get the path to the Kiro icon
-    getKiroIconPath() {
-        return vscode.Uri.file(path.join(this.context.extensionPath, 'images', 'kiro.svg'));
+    // Get the main Kiro icon (no more emojis!)
+    getKiroIcon() {
+        // VS Code status bar supports $(icon-name) syntax for built-in icons
+        // For custom icons, we use the icon path
+        return '$(symbol-misc)'; // Fallback to built-in icon
     }
-    // Create a status bar item with the Kiro icon
-    createStatusBarItemWithIcon() {
-        const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
-        // Try to use the custom icon, fallback to text if not available
-        try {
-            const iconPath = this.getKiroIconPath();
-            // VS Code doesn't support custom icons in status bar directly
-            // So we'll use a Unicode character that looks similar
-            statusBarItem.text = '$(ghost)'; // VS Code built-in ghost icon
-        }
-        catch (error) {
-            // Fallback to simple text
-            statusBarItem.text = '👻';
-        }
-        return statusBarItem;
+    // Get icon for different states (all use the same Kiro image)
+    getStateIcon(state) {
+        // Always return the same Kiro icon, no more emojis
+        return '$(symbol-misc) Kiro';
     }
-    // Get different animation states
+    // Get animation states (no more emoji animation)
     getAnimationStates() {
-        // Using VS Code's built-in icons for animation
+        // Return the same icon for all animation frames
+        // This effectively disables emoji animation
         return [
-            '$(ghost)', // Ghost icon
-            '$(star-full)', // Star icon  
-            '$(sparkle)', // Sparkle icon (if available)
-            '$(circle-filled)' // Circle icon
+            '$(symbol-misc) Kiro',
+            '$(symbol-misc) Kiro',
+            '$(symbol-misc) Kiro',
+            '$(symbol-misc) Kiro'
         ];
     }
-    // Get state-specific icons
-    getStateIcon(state) {
-        switch (state) {
-            case 'idle':
-                return '$(ghost)';
-            case 'active':
-                return '$(zap)';
-            case 'error':
-                return '$(warning)';
-            case 'success':
-                return '$(check)';
-            case 'completion':
-                return '$(trophy)';
-            case 'notification':
-                return '$(bell)';
-            case 'celebration':
-                return '$(star-full)';
-            default:
-                return '$(ghost)';
-        }
+    // Alternative: Use ThemeIcon for better VS Code integration
+    getThemeIcon() {
+        return new vscode.ThemeIcon('symbol-misc');
+    }
+    // Get icon URI for the custom SVG
+    getIconUri() {
+        return vscode.Uri.file(this.iconPath);
     }
 }
 exports.IconManager = IconManager;
