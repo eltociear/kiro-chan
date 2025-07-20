@@ -118,7 +118,9 @@
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "package": "node -r ./suppress-warnings.js -e \"require('child_process').execSync('npx vsce package', {stdio: 'inherit'})\"",
+    "package-quiet": "node --no-warnings -r ./suppress-warnings.js -e \"require('child_process').execSync('npx vsce package', {stdio: 'inherit'})\""
   },
   "devDependencies": {
     "@types/jest": "^29.5.0",

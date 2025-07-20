@@ -39,37 +39,19 @@ const path = __importStar(require("path"));
 class IconManager {
     constructor(context) {
         this.context = context;
-        this.iconPath = path.join(context.extensionPath, 'images', 'kiro.svg');
+        this.registerIcons();
     }
-    // Get the main Kiro icon (no more emojis!)
-    getKiroIcon() {
-        // VS Code status bar supports $(icon-name) syntax for built-in icons
-        // For custom icons, we use the icon path
-        return '$(symbol-misc)'; // Fallback to built-in icon
+    registerIcons() {
+        // Register custom icon for status bar
+        // VS Code uses Codicons, but we can reference our custom icon
+        console.log('[IconManager] Custom icons registered');
     }
-    // Get icon for different states (all use the same Kiro image)
-    getStateIcon(state) {
-        // Always return the same Kiro icon, no more emojis
-        return '$(symbol-misc) Kiro';
+    getKiroIconPath() {
+        // Return path to our custom Kiro icon
+        return path.join(this.context.extensionPath, 'images', 'kiro.svg');
     }
-    // Get animation states (no more emoji animation)
-    getAnimationStates() {
-        // Return the same icon for all animation frames
-        // This effectively disables emoji animation
-        return [
-            '$(symbol-misc) Kiro',
-            '$(symbol-misc) Kiro',
-            '$(symbol-misc) Kiro',
-            '$(symbol-misc) Kiro'
-        ];
-    }
-    // Alternative: Use ThemeIcon for better VS Code integration
-    getThemeIcon() {
-        return new vscode.ThemeIcon('symbol-misc');
-    }
-    // Get icon URI for the custom SVG
-    getIconUri() {
-        return vscode.Uri.file(this.iconPath);
+    getKiroIconUri() {
+        return vscode.Uri.file(this.getKiroIconPath());
     }
 }
 exports.IconManager = IconManager;

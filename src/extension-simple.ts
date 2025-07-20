@@ -25,8 +25,8 @@ export function activate(context: vscode.ExtensionContext) {
     statusBarItem.command = 'kiro-chan.openSettings';
     statusBarItem.tooltip = 'Kiro Character - Click for settings';
     
-    // Show immediately with custom icon (no emojis)
-    statusBarItem.text = '$(kiro-icon) Kiro';
+    // Show immediately with Codicon (no emojis)
+    statusBarItem.text = '$(ghost) Kiro';
     statusBarItem.show();
     
     console.log('✅ Status bar item created and shown');
@@ -47,24 +47,24 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     const setIdleCommand = vscode.commands.registerCommand('kiro-chan.setIdle', () => {
-        statusBarItem.text = '$(kiro-icon) Kiro (Idle)';
+        statusBarItem.text = '$(ghost) Kiro (Idle)';
         vscode.window.showInformationMessage('Kiro: Idle state');
     });
 
     const setActiveCommand = vscode.commands.registerCommand('kiro-chan.setActive', () => {
-        statusBarItem.text = '$(kiro-icon) Kiro (Active)';
+        statusBarItem.text = '$(zap) Kiro (Active)';
         vscode.window.showInformationMessage('Kiro: Active state');
     });
 
     const setErrorCommand = vscode.commands.registerCommand('kiro-chan.setError', () => {
-        statusBarItem.text = '$(kiro-icon) Kiro (Error)';
+        statusBarItem.text = '$(warning) Kiro (Error)';
         vscode.window.showInformationMessage('Kiro: Error state');
     });
 
     // Task completion command
     const taskCompletedCommand = vscode.commands.registerCommand('kiro-chan.taskCompleted', async () => {
         await taskMonitor.markTaskCompleted('Manual Task');
-        statusBarItem.text = '$(kiro-icon) Kiro (Completed)';
+        statusBarItem.text = '$(check) Kiro (Completed)';
     });
 
     // Test notification command
@@ -118,7 +118,7 @@ function startAnimation() {
         
         // Subtle animation with dots instead of emojis
         const dots = '.'.repeat((animationFrame % 3) + 1);
-        statusBarItem.text = `$(kiro-icon) Kiro${dots}`;
+        statusBarItem.text = `$(ghost) Kiro${dots}`;
     }, 1000); // 1 second intervals
 }
 
@@ -140,19 +140,19 @@ function showSoundVisualFeedback(soundType: string) {
     // Show visual feedback with text changes instead of emoji changes
     switch (soundType) {
         case 'success':
-            statusBarItem.text = '$(kiro-icon) Kiro [OK]';
+            statusBarItem.text = '$(check) Kiro [OK]';
             break;
         case 'completion':
-            statusBarItem.text = '$(kiro-icon) Kiro [DONE]';
+            statusBarItem.text = '$(check-all) Kiro [DONE]';
             break;
         case 'notification':
-            statusBarItem.text = '$(kiro-icon) Kiro [INFO]';
+            statusBarItem.text = '$(bell) Kiro [INFO]';
             break;
         case 'celebration':
-            statusBarItem.text = '$(kiro-icon) Kiro [YAY]';
+            statusBarItem.text = '$(star) Kiro [YAY]';
             break;
         default:
-            statusBarItem.text = '$(kiro-icon) Kiro [SND]';
+            statusBarItem.text = '$(unmute) Kiro [SND]';
     }
     
     // Restore original text after a short delay

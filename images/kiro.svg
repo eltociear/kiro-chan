@@ -1,16 +1,16 @@
 <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-  <!-- Kiro character as SVG -->
+  <!-- Kiro character as a simple ghost-like figure -->
   <defs>
     <radialGradient id="ghostGradient" cx="50%" cy="30%" r="70%">
       <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#f0f0f0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e0e0e0;stop-opacity:1" />
     </radialGradient>
   </defs>
   
   <!-- Ghost body -->
   <path d="M8 2 C5 2, 3 4, 3 7 L3 12 C3 13, 4 13, 4 12 L5 11 C5 12, 6 12, 6 11 L7 10 C7 11, 8 11, 8 10 L9 11 C9 12, 10 12, 10 11 L11 12 C11 13, 12 13, 12 12 L12 7 C12 4, 10 2, 8 2 Z" 
         fill="url(#ghostGradient)" 
-        stroke="#e0e0e0" 
+        stroke="#d0d0d0" 
         stroke-width="0.5"/>
   
   <!-- Eyes -->

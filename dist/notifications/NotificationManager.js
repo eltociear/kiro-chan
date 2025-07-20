@@ -52,8 +52,8 @@ class NotificationManager {
     }
     async showTaskCompletedNotification(taskName) {
         const message = taskName
-            ? `Task "${taskName}" has been completed! 🎉`
-            : 'Kiro task has been completed! 🎉';
+            ? `Task "${taskName}" has been completed!`
+            : 'Kiro task has been completed!';
         await this.showNotification({
             title: '✅ Task Completed',
             message,
@@ -156,13 +156,13 @@ class NotificationManager {
     showCelebration() {
         // Show a fun celebration message
         const celebrations = [
-            '🎉 Awesome work!',
-            '🌟 You\'re on fire!',
-            '🚀 Keep it up!',
-            '💪 Great job!',
-            '🎯 Perfect!',
-            '✨ Excellent!',
-            '🏆 Outstanding!'
+            'Awesome work!',
+            'You\'re on fire!',
+            'Keep it up!',
+            'Great job!',
+            'Perfect!',
+            'Excellent!',
+            'Outstanding!'
         ];
         const randomCelebration = celebrations[Math.floor(Math.random() * celebrations.length)];
         vscode.window.showInformationMessage(randomCelebration);
