@@ -40,6 +40,13 @@
           "fontPath": "./kiro.woff",
           "fontCharacter": "\\e903"
         }
+      },
+      "kiro-standby": {
+        "description": "Kiro character in standby state",
+        "default": {
+          "fontPath": "./kiro.woff",
+          "fontCharacter": "\\e904"
+        }
       }
     },
     "commands": [

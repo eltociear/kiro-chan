@@ -2,23 +2,31 @@ import * as vscode from 'vscode';
 
 let statusBarItem: vscode.StatusBarItem;
 let animationTimer: NodeJS.Timeout | undefined;
+let activeAnimationTimer: NodeJS.Timeout | undefined;
 let animationFrame = 0;
 let statusBarVisible = true;
+let isActiveState = false;
 
 // Icon states for different Kiro animations
 const KIRO_ICONS = {
-    idle: 'kiro-idle',
-    active: 'kiro-active', 
-    error: 'kiro-error',
-    complete: 'kiro-complete'
+    idle: 'kiro-idle',       // \e900
+    active: 'kiro-active',   // \e901
+    error: 'kiro-error',     // \e902
+    complete: 'kiro-complete', // \e903
+    standby: 'kiro-standby'  // \e904
 };
 
-// Animation sequence for idle state
-const IDLE_SEQUENCE = [
-    KIRO_ICONS.idle,
-    KIRO_ICONS.idle,
-    KIRO_ICONS.idle,
-    KIRO_ICONS.active  // Occasional blink/movement
+// Animation sequence for active state (when typing): \e900, \e901, \e902
+const ACTIVE_SEQUENCE = [
+    KIRO_ICONS.idle,     // \e900
+    KIRO_ICONS.active,   // \e901
+    KIRO_ICONS.error     // \e902
+];
+
+// Animation sequence for standby state: \e903, \e904
+const STANDBY_SEQUENCE = [
+    KIRO_ICONS.complete, // \e903
+    KIRO_ICONS.standby   // \e904
 ];
 
 export function activate(context: vscode.ExtensionContext) {
@@ -30,25 +38,25 @@ export function activate(context: vscode.ExtensionContext) {
     statusBarItem.tooltip = 'Kiro Character - Click to toggle';
     
     // Show initial state
-    updateStatusBarIcon(KIRO_ICONS.idle);
+    updateStatusBarIcon(KIRO_ICONS.complete);
     showStatusBar();
     
-    // Start animation
-    startAnimation();
+    // Start standby animation
+    startStandbyAnimation();
     
     // Listen for text document changes (similar to BongoCat)
     const textChangeDisposable = vscode.workspace.onDidChangeTextDocument((event) => {
         if (statusBarVisible && event.contentChanges.length > 0) {
-            // Show active state when typing
-            updateStatusBarIcon(KIRO_ICONS.active);
+            // Switch to active animation sequence when typing
+            startActiveAnimation();
             
-            // Reset to idle after a short delay
-            if (animationTimer) {
-                clearTimeout(animationTimer);
+            // Reset to standby animation after delay
+            if (activeAnimationTimer) {
+                clearTimeout(activeAnimationTimer);
             }
-            animationTimer = setTimeout(() => {
-                updateStatusBarIcon(KIRO_ICONS.idle);
-            }, 500);
+            activeAnimationTimer = setTimeout(() => {
+                startStandbyAnimation();
+            }, 2000);
         }
     });
     
@@ -57,11 +65,11 @@ export function activate(context: vscode.ExtensionContext) {
         statusBarVisible = !statusBarVisible;
         if (statusBarVisible) {
             showStatusBar();
-            startAnimation();
+            startStandbyAnimation();
             vscode.window.showInformationMessage('Kiro Character is now visible');
         } else {
             hideStatusBar();
-            stopAnimation();
+            stopAllAnimations();
             vscode.window.showInformationMessage('Kiro Character is now hidden');
         }
     });
@@ -120,31 +128,49 @@ function hideStatusBar() {
     }
 }
 
-function startAnimation() {
-    if (animationTimer) {
-        clearInterval(animationTimer);
-    }
+function startActiveAnimation() {
+    stopAllAnimations();
+    isActiveState = true;
+    animationFrame = 0;
     
-    // Subtle animation cycle through idle sequence
+    // Active animation: cycle through \e900, \e901, \e902
     animationTimer = setInterval(() => {
-        if (statusBarVisible) {
-            animationFrame = (animationFrame + 1) % IDLE_SEQUENCE.length;
-            updateStatusBarIcon(IDLE_SEQUENCE[animationFrame]);
+        if (statusBarVisible && isActiveState) {
+            animationFrame = (animationFrame + 1) % ACTIVE_SEQUENCE.length;
+            updateStatusBarIcon(ACTIVE_SEQUENCE[animationFrame]);
         }
-    }, 2000); // Change every 2 seconds
+    }, 100); // Very fast animation when active
 }
 
-function stopAnimation() {
+function startStandbyAnimation() {
+    stopAllAnimations();
+    isActiveState = false;
+    animationFrame = 0;
+    
+    // Standby animation: cycle through \e903, \e904
+    animationTimer = setInterval(() => {
+        if (statusBarVisible && !isActiveState) {
+            animationFrame = (animationFrame + 1) % STANDBY_SEQUENCE.length;
+            updateStatusBarIcon(STANDBY_SEQUENCE[animationFrame]);
+        }
+    }, 1500); // Slower animation when standby
+}
+
+function stopAllAnimations() {
     if (animationTimer) {
         clearInterval(animationTimer);
         animationTimer = undefined;
+    }
+    if (activeAnimationTimer) {
+        clearTimeout(activeAnimationTimer);
+        activeAnimationTimer = undefined;
     }
 }
 
 export function deactivate() {
     console.log('🛑 Kiro-Chan BongoCat-style extension is deactivating...');
     
-    stopAnimation();
+    stopAllAnimations();
     
     if (statusBarItem) {
         statusBarItem.dispose();
