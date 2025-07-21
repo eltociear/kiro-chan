@@ -4,7 +4,19 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git push:*)",
-      "Bash(git remote set-url:*)"
+      "Bash(git remote set-url:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(npm run build:*)",
+      "Bash(npx tsc:*)",
+      "Bash(mkdir:*)",
+      "Bash(npm run:*)",
+      "Bash(node:*)",
+      "Bash(code:*)",
+      "Bash(curl:*)",
+      "WebFetch(domain:api.github.com)",
+      "Bash(cp:*)",
+      "Bash(ls:*)"
     ],
     "deny": []
   }

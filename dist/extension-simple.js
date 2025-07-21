@@ -177,3 +177,4 @@ function deactivate() {
     }
     console.log('✅ Kiro-Chan extension deactivated');
 }
+//# sourceMappingURL=extension-simple.js.map

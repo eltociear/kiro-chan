@@ -85,3 +85,4 @@ KiroPixelArt.FRAMES = [
     '⬛🟣⬛',
     '▫️🟣▫️'
 ];
+//# sourceMappingURL=kiro-pixel-art.js.map

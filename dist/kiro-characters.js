@@ -54,3 +54,4 @@ function getKiroCharacter(state = 'normal') {
             return exports.KIRO_CHARS.purple;
     }
 }
+//# sourceMappingURL=kiro-characters.js.map

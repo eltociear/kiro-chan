@@ -13,39 +13,39 @@
   ],
   "contributes": {
     "icons": {
-      "kiro-icon": {
-        "description": "Kiro character icon",
-        "default": {
-          "fontPath": "./resources/kiro.woff",
-          "fontCharacter": ""
-        }
-      },
       "kiro-idle": {
         "description": "Kiro character in idle state",
         "default": {
-          "fontPath": "./resources/kiro.woff",
-          "fontCharacter": ""
+          "fontPath": "./kiro.woff",
+          "fontCharacter": "\\e900"
         }
       },
       "kiro-active": {
         "description": "Kiro character in active state",
         "default": {
-          "fontPath": "./resources/kiro.woff",
-          "fontCharacter": ""
+          "fontPath": "./kiro.woff",
+          "fontCharacter": "\\e901"
         }
       },
       "kiro-error": {
         "description": "Kiro character in error state",
         "default": {
-          "fontPath": "./resources/kiro.woff",
-          "fontCharacter": ""
+          "fontPath": "./kiro.woff",
+          "fontCharacter": "\\e902"
+        }
+      },
+      "kiro-complete": {
+        "description": "Kiro character in complete state",
+        "default": {
+          "fontPath": "./kiro.woff",
+          "fontCharacter": "\\e903"
         }
       }
     },
     "commands": [
       {
-        "command": "kiro-chan.openSettings",
-        "title": "Open Settings",
+        "command": "kiro-chan.toggleStatusBar",
+        "title": "Toggle Kiro Character",
         "category": "Kiro Chan"
       },
       {
@@ -64,23 +64,8 @@
         "category": "Kiro Chan"
       },
       {
-        "command": "kiro-chan.taskCompleted",
-        "title": "Task Completed",
-        "category": "Kiro Chan"
-      },
-      {
-        "command": "kiro-chan.testNotification",
-        "title": "Test Notification & Sound",
-        "category": "Kiro Chan"
-      },
-      {
-        "command": "kiro-chan.testWorkSession",
-        "title": "Test Work Session Complete",
-        "category": "Kiro Chan"
-      },
-      {
-        "command": "kiro-chan.testMilestone",
-        "title": "Test Milestone Celebration",
+        "command": "kiro-chan.setComplete",
+        "title": "Set Complete State",
         "category": "Kiro Chan"
       }
     ],
@@ -126,7 +111,7 @@
   },
   "publisher": "eltociear",
   "version": "1.0.0",
-  "description": "Kiroのステータスバーに常駐するキャラクター拡張機能",
+  "description": "Kiro character extension with SVG-based icons in status bar - BongoCat style implementation",
   "repository": "https://github.com/eltociear/kiro-chan.git",
   "license": "MIT",
   "author": "Kiro Status Character Extension Contributors",
@@ -137,11 +122,13 @@
     "animation",
     "productivity"
   ],
-  "main": "dist/extension-simple.js",
+  "main": "dist/extension-bongocat-style.js",
   "files": [
     "dist/**/*",
     "images/**/*",
-    "images/kiro_1.svg"
+    "theme/**/*",
+    "images/kiro_1.svg",
+    "kiro.woff"
   ],
   "scripts": {
     "build": "tsc",

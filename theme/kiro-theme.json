@@ -1,0 +1,27 @@
+{
+  "fonts": [
+    {
+      "id": "kiro",
+      "src": [
+        {
+          "path": "./kiro.woff",
+          "format": "woff"
+        }
+      ]
+    }
+  ],
+  "iconDefinitions": {
+    "kiro-idle": {
+      "fontCharacter": "\\61"
+    },
+    "kiro-active": {
+      "fontCharacter": "\\62"
+    },
+    "kiro-error": {
+      "fontCharacter": "\\63"
+    },
+    "kiro-complete": {
+      "fontCharacter": "\\64"
+    }
+  }
+}
