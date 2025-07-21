@@ -1,214 +1,171 @@
-# Kiro Status Character Extension
+# Kiro-Chan VS Code Extension
 
-Kiro のステータスバーに常駐する動的キャラクター（👻）を表示する拡張機能です。このキャラクターは常に少しずつ動いており、ユーザーに Kiro が動作していることを視覚的に示し、親しみやすい体験を提供します。
+VS Code ステータスバーでSVGアニメーションするKiroキャラクターを表示する拡張機能です。BongoCat風のリアクティブアニメーションで、タイピング時とスタンバイ時で異なるアニメーションパターンを楽しめます。
 
 ## 機能
 
-- **動的キャラクター表示**: ステータスバーに 👻 キャラクターまたはSVGアイコンを表示
-- **カスタムSVGアイコン**: 独自のSVGアイコン（images/kiro_1.svg）を使用可能
-- **状態反映アニメーション**: Kiro の状態（アイドル、実行中、エラー）に応じて異なる動きパターン
-- **パフォーマンス最適化**: システムリソースに応じた自動的なアニメーション調整
-- **カスタマイズ可能**: 表示/非表示、アニメーション速度、位置の設定
-- **レスポンシブ対応**: 画面サイズに応じた適応的表示
-- **アクセシビリティ対応**: ARIA 属性とキーボードナビゲーション
-
-## インストール
-
-### VS Code 拡張機能として使用（推奨）
-
-1. `kiro-chan-1.0.0.vsix` ファイルをダウンロード
-2. VS Code で以下のコマンドを実行:
-   ```bash
-   code --install-extension kiro-chan-1.0.0.vsix
-   ```
-   または、VS Code 内で `Ctrl+Shift+P` → `Extensions: Install from VSIX...` を選択
-
-### 開発者向けインストール
-
-1. プロジェクトをクローンまたはダウンロード
-2. 依存関係をインストール:
-   ```bash
-   npm install
-   ```
-3. TypeScript をコンパイル:
-   ```bash
-   npm run build
-   ```
-4. 拡張機能をパッケージ:
-   ```bash
-   npx vsce package
-   ```
-
-## 使用方法
-
-### VS Code 拡張機能として使用
-
-1. **自動起動**: VS Code 起動時に自動的にステータスバーに 👻 キャラクターが表示されます
-
-2. **設定変更**:
-
-   - `Ctrl+Shift+P` → `Preferences: Open Settings (UI)`
-   - `kiro-chan` で検索
-   - または、ステータスバーのキャラクターをクリック
-
-3. **手動状態変更**（デバッグ用）:
-   - `Ctrl+Shift+P` → `Kiro Chan: Set Idle State`
-   - `Ctrl+Shift+P` → `Kiro Chan: Set Active State`
-   - `Ctrl+Shift+P` → `Kiro Chan: Set Error State`
-
-### プログラムでの使用
-
-```typescript
-import * as vscode from "vscode";
-
-// 拡張機能のactivate関数内で自動的に初期化されます
-await character.initialize();
-
-// 設定UI を表示
-character.showSettings();
-```
-
-### 手動での状態制御
-
-```typescript
-import { KiroState } from "./src/types";
-
-// 状態を手動で変更
-character.updateState(KiroState.EXECUTING);
-character.updateState(KiroState.ERROR);
-character.updateState(KiroState.IDLE);
-```
-
-## 設定オプション
-
-| 設定項目         | 説明                      | デフォルト値 | 範囲              |
-| ---------------- | ------------------------- | ------------ | ----------------- |
-| `enabled`        | キャラクターの表示/非表示 | `true`       | boolean           |
-| `animationSpeed` | アニメーション速度        | `1.0`        | 0.1 - 3.0         |
-| `position`       | ステータスバー内の位置    | `'right'`    | 'left' \| 'right' |
-| `useSvgIcon`     | SVGアイコンの使用         | `true`       | boolean           |
+- **SVGアニメーション**: カスタムWOFFフォントによる高品質なSVGアイコン表示
+- **リアクティブアニメーション**: タイピング検出による状態変化
+- **2つのアニメーションモード**: 
+  - **アクティブ状態**: タイピング時の高速アニメーション（100ms間隔）
+  - **スタンバイ状態**: 待機時のゆっくりアニメーション（1500ms間隔）
+- **BongoCat風実装**: Product Icons システムを使用した本格的なSVGフォント統合
+- **簡単カスタマイズ**: VS Code設定からアニメーション速度や表示設定を変更可能
 
 ## アニメーションパターン
 
-### アイドル状態
+### アクティブ状態（タイピング時）
+- Unicode文字: `\e900` → `\e901` → `\e902` をサイクル
+- 更新間隔: 100ms（高速）
+- トリガー: ドキュメントの変更検出
+- 自動復帰: 2秒後にスタンバイ状態に戻る
 
-- ゆっくりとした浮遊アニメーション
-- 2 秒周期で上下に微細な動き
-- 軽微な回転効果
+### スタンバイ状態（待機時）
+- Unicode文字: `\e903` → `\e904` をサイクル
+- 更新間隔: 1500ms（ゆっくり）
+- デフォルト状態: 拡張機能起動時やアイドル時
 
-### アクティブ状態
+## インストール
 
-- エネルギッシュなバウンスアニメーション
-- 1 秒周期でより活発な動き
-- スケール変化による強調効果
+### VSIXファイルからインストール
 
-### エラー状態
+1. 最新の `.vsix` ファイルをダウンロード
+2. VS Code で `Ctrl+Shift+P` → `Extensions: Install from VSIX...`
+3. ダウンロードした `.vsix` ファイルを選択
 
-- 振動アニメーション
-- ランダムな左右の動き
-- 3 秒後に自動的に減衰
+### コマンドラインからインストール
 
-## パフォーマンス最適化
+```bash
+code --install-extension kiro-chan-v4.vsix
+```
 
-- **自動フレームレート調整**: システム負荷に応じて 15-60FPS で動作
-- **メモリ使用量監視**: 閾値を超えた場合の自動的な複雑度削減
-- **CSS フォールバック**: JavaScript アニメーションが困難な場合の CSS 代替
-- **レスポンシブ制御**: 狭い画面での自動非表示
+### 開発者向けビルド
 
-## エラーハンドリング
+```bash
+# 依存関係のインストール
+npm install
 
-拡張機能は包括的なエラーハンドリングシステムを備えています：
+# TypeScriptビルド
+npm run build
 
-- **初期化エラー**: フォールバック設定での継続動作
-- **アニメーションエラー**: 静的表示への自動切り替え
-- **パフォーマンスエラー**: 動的な品質調整
-- **設定エラー**: デフォルト設定の自動適用
+# 拡張機能パッケージ作成
+npx vsce package
+```
+
+## 使用方法
+
+### 基本操作
+
+1. **自動起動**: VS Code起動時にステータスバー右側にKiroが表示されます
+2. **アニメーション**: テキスト編集時に自動的にアクティブアニメーションに切り替わります
+3. **手動制御**: ステータスバーのKiroをクリックして表示/非表示を切り替え
+
+### コマンドパレット
+
+- `Ctrl+Shift+P` で以下のコマンドが使用可能:
+  - `Kiro Chan: Toggle Kiro Character` - 表示切り替え
+  - `Kiro Chan: Set Idle State` - アイドル状態に設定
+  - `Kiro Chan: Set Active State` - アクティブ状態に設定
+  - `Kiro Chan: Set Error State` - エラー状態に設定
+  - `Kiro Chan: Set Complete State` - 完了状態に設定
+
+## 設定オプション
+
+VS Code設定（`settings.json`）で以下の項目をカスタマイズできます：
+
+```json
+{
+  "kiro-chan.enabled": true,
+  "kiro-chan.animationSpeed": 1.0,
+  "kiro-chan.notificationEnabled": true,
+  "kiro-chan.soundEnabled": true,
+  "kiro-chan.soundVolume": 0.5,
+  "kiro-chan.useSvgIcon": true
+}
+```
+
+| 設定項目 | 説明 | デフォルト値 | 範囲 |
+|---------|------|-------------|------|
+| `enabled` | Kiroキャラクターの表示/非表示 | `true` | boolean |
+| `animationSpeed` | アニメーション速度倍率 | `1.0` | 0.1 - 3.0 |
+| `notificationEnabled` | タスク完了通知の表示 | `true` | boolean |
+| `soundEnabled` | 音声効果の有効/無効 | `true` | boolean |
+| `soundVolume` | 音声ボリューム | `0.5` | 0.0 - 1.0 |
+| `useSvgIcon` | SVGアイコンの使用（絵文字の代わり） | `true` | boolean |
+
+## 技術仕様
+
+### アーキテクチャ
+
+- **Product Icons システム**: VS Code標準のアイコンシステムを使用
+- **WOFFフォント**: IcoMoonで生成されたWebフォントファイル（`kiro.woff`）
+- **Unicode マッピング**: 各アニメーションフレームに対応するUnicode文字
+- **BongoCat実装**: テキスト変更イベントによるリアクティブアニメーション
+
+### ファイル構成
+
+```
+kiro-chan/
+├── src/
+│   └── extension-bongocat-style.ts    # メイン拡張機能ロジック
+├── images/
+│   └── kiro_1.svg                     # オリジナルSVGファイル
+├── svg-for-icomoon/                   # IcoMoon用統合SVGファイル
+│   ├── kiro-idle.svg                  # \e900
+│   ├── kiro-active.svg                # \e901
+│   ├── kiro-error.svg                 # \e902
+│   └── kiro-complete.svg              # \e903
+├── svg-simplified/                    # 簡略化SVGファイル
+├── kiro.woff                          # Webフォントファイル
+├── package.json                       # 拡張機能設定
+└── README.md
+```
+
+### Unicode文字マッピング
+
+| 状態 | Unicode | 用途 |
+|------|---------|------|
+| `\e900` | kiro-idle | アクティブアニメーション1フレーム目 |
+| `\e901` | kiro-active | アクティブアニメーション2フレーム目 |
+| `\e902` | kiro-error | アクティブアニメーション3フレーム目 |
+| `\e903` | kiro-complete | スタンバイアニメーション1フレーム目 |
+| `\e904` | kiro-standby | スタンバイアニメーション2フレーム目 |
 
 ## 開発
 
-### プロジェクト構造
+### フォント作成ワークフロー
 
-```
-src/
-├── animation/          # アニメーション制御
-├── error/             # エラーハンドリング
-├── performance/       # パフォーマンス最適化
-├── settings/          # 設定管理
-├── state/            # 状態監視
-├── types/            # TypeScript型定義
-├── ui/               # ユーザーインターフェース
-├── extension.ts      # 拡張機能エントリーポイント
-└── StatusBarCharacter.ts  # メインコントローラー
-
-styles/
-└── character.css     # スタイルシート
-
-tests/
-├── unit tests        # ユニットテスト
-├── integration.test.ts  # 統合テスト
-└── extension.test.ts    # 拡張機能テスト
-```
-
-### スクリプト
-
-```bash
-# 開発用ビルド（ウォッチモード）
-npm run watch
-
-# プロダクションビルド
-npm run build
-
-# テスト実行
-npm test
-
-# テスト（ウォッチモード）
-npm run test:watch
-```
+1. **SVG統合**: `scripts/create-unified-svgs.js` で複数パスを統合
+2. **IcoMoon変換**: [IcoMoon App](https://icomoon.io/app/) でSVGをWOFFに変換
+3. **Unicode設定**: 各SVGファイルに対応するUnicode文字を設定
+4. **VS Code統合**: `package.json` の `contributes.icons` セクションで定義
 
 ### テスト
 
-プロジェクトには包括的なテストスイートが含まれています：
+```bash
+# TypeScriptビルド
+npm run build
 
-- **ユニットテスト**: 各コンポーネントの個別テスト
-- **統合テスト**: コンポーネント間の連携テスト
-- **パフォーマンステスト**: メモリ使用量と実行時間の検証
-- **エラーハンドリングテスト**: 異常系の動作確認
+# 拡張機能パッケージ作成
+npx vsce package
 
-## アーキテクチャ
-
-### コンポーネント構成
-
-```
-StatusBarCharacter (メインコントローラー)
-├── AnimationController (アニメーション制御)
-├── StateMonitor (状態監視)
-├── StateAnimationBridge (状態-アニメーション連携)
-├── SettingsManager (設定管理)
-├── PerformanceOptimizer (パフォーマンス最適化)
-└── ErrorHandler (エラーハンドリング)
+# VS Codeでのテスト
+code --install-extension ./kiro-chan-v4.vsix
 ```
 
-### データフロー
+## トラブルシューティング
 
-1. **状態検出**: StateMonitor が Kiro の状態変化を検出
-2. **状態変換**: StateAnimationBridge が状態をアニメーションパターンに変換
-3. **アニメーション実行**: AnimationController が DOM 要素を制御
-4. **パフォーマンス監視**: PerformanceOptimizer がリソース使用量を監視
-5. **自動調整**: 必要に応じてアニメーション品質を動的調整
+### SVGが表示されない場合
 
-## ブラウザサポート
+1. `kiro.woff` ファイルが正しく配置されているか確認
+2. `package.json` の `contributes.icons` 設定を確認
+3. VS Code を再起動してキャッシュをクリア
 
-- Chrome/Chromium 88+
-- Firefox 85+
-- Safari 14+
-- Edge 88+
+### アニメーションが動作しない場合
 
-## アクセシビリティ
-
-- ARIA ラベルとロール属性
-- キーボードナビゲーション対応
-- ハイコントラストモード対応
-- モーション設定の尊重（`prefers-reduced-motion`）
+1. `kiro-chan.enabled` 設定が `true` になっているか確認
+2. ステータスバーのKiroをクリックして手動で有効化
+3. コマンドパレットから手動で状態を変更してテスト
 
 ## ライセンス
 
@@ -216,27 +173,15 @@ MIT License
 
 ## 貢献
 
-1. フォークを作成
-2. フィーチャーブランチを作成 (`git checkout -b feature/amazing-feature`)
-3. 変更をコミット (`git commit -m 'Add amazing feature'`)
-4. ブランチにプッシュ (`git push origin feature/amazing-feature`)
+1. このリポジトリをフォーク
+2. フィーチャーブランチを作成 (`git checkout -b feature/new-feature`)
+3. 変更をコミット (`git commit -m 'Add new feature'`)
+4. ブランチにプッシュ (`git push origin feature/new-feature`)
 5. プルリクエストを作成
 
-## 変更履歴
+## 参考
 
-### v1.1.0
-
-- SVGアイコンサポートの追加
-- カスタムアイコン（images/kiro_1.svg）の実装
-- テーマ対応の改善
-- SVGアイコン設定オプションの追加
-
-- 包括的なエラーハンドリング
-
-## サポート
-
-問題や質問がある場合は、GitHub の Issues ページで報告してください。
-
-## 謝辞
-
-このプロジェクトは、開発者の生産性向上と Kiro エクスペリエンスの向上を目的として開発されました。
+- [BongoCat for VS Code](https://github.com/kitgore/BongoCat) - アニメーション実装の参考
+- [VS Code Extension API](https://code.visualstudio.com/api) - 拡張機能開発ガイド
+- [VS Code Product Icons](https://code.visualstudio.com/api/extension-guides/product-icon-theme) - アイコンシステム
+- [IcoMoon App](https://icomoon.io/app/) - SVGからWOFFフォント生成ツール
