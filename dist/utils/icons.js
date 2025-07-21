@@ -55,4 +55,3 @@ class IconManager {
     }
 }
 exports.IconManager = IconManager;
-//# sourceMappingURL=icons.js.map

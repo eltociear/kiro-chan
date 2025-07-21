@@ -40,14 +40,18 @@ exports.getCurrentState = getCurrentState;
 exports.setCurrentState = setCurrentState;
 const vscode = __importStar(require("vscode"));
 const types_1 = require("./types");
+const SvgIconUtils_1 = require("./utils/SvgIconUtils");
 let statusBarItem = null;
 let animationInterval = null;
 let currentState = types_1.KiroState.IDLE;
 let animationFrame = 0;
+let extensionContext = null;
 // Extension entry point
 async function activate(context) {
     try {
         console.log('[Extension] Kiro Status Character extension activating...');
+        // Store the extension context for later use
+        extensionContext = context;
         // Create status bar item immediately
         statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
         statusBarItem.command = 'kiro-chan.openSettings';
@@ -69,7 +73,7 @@ async function activate(context) {
         });
         context.subscriptions.push(configWatcher);
         console.log('[Extension] Kiro Status Character extension activated successfully');
-        vscode.window.showInformationMessage('👻 Kiro Character is now active in the status bar!');
+        vscode.window.showInformationMessage('Kiro Character is now active in the status bar!');
     }
     catch (error) {
         console.error('[Extension] Failed to activate Kiro Status Character extension:', error);
@@ -99,10 +103,27 @@ function deactivate() {
 function updateStatusBar() {
     if (!statusBarItem)
         return;
-    const character = getAnimatedCharacter();
     const stateText = getStateText();
-    statusBarItem.text = `${character} Kiro`;
-    statusBarItem.tooltip = `Kiro Character (${stateText}) - Click to open settings`;
+    try {
+        if (extensionContext) {
+            // Use SVG icon if extension context is available
+            statusBarItem.text = SvgIconUtils_1.SvgIconUtils.getStatusBarTextWithIcon(extensionContext, 'kiro_1.svg', 'Kiro', getAnimatedCharacter() // Fallback to emoji if SVG fails
+            );
+        }
+        else {
+            // Fallback to emoji character if no extension context
+            const character = getAnimatedCharacter();
+            statusBarItem.text = `${character} Kiro`;
+        }
+        statusBarItem.tooltip = `Kiro Character (${stateText}) - Click to open settings`;
+    }
+    catch (error) {
+        // If any error occurs, fall back to the emoji character
+        const character = getAnimatedCharacter();
+        statusBarItem.text = `${character} Kiro`;
+        statusBarItem.tooltip = `Kiro Character (${stateText}) - Click to open settings`;
+        console.error('[Extension] Error updating status bar:', error);
+    }
 }
 function getAnimatedCharacter() {
     const frame = animationFrame % 8;
@@ -146,7 +167,9 @@ function startAnimation() {
     const speed = config.get('animationSpeed', 1.0);
     if (!enabled)
         return;
-    const frameRate = Math.max(1, Math.min(10, speed * 2)); // 1-10 fps
+    // For SVG icon, we can reduce the animation rate since we're primarily using it for state changes
+    // rather than animation frames
+    const frameRate = Math.max(1, Math.min(5, speed * 1)); // 1-5 fps is sufficient for state changes
     const frameTime = 1000 / frameRate;
     animationInterval = setInterval(() => {
         animationFrame++;

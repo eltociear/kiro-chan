@@ -16,7 +16,8 @@ export declare class StatusBarCharacterVSCode implements IStatusBarCharacter {
     private isInitialized;
     private animationInterval;
     private currentAnimationFrame;
-    constructor();
+    private extensionContext;
+    constructor(context?: vscode.ExtensionContext);
     initialize(): Promise<void>;
     show(): void;
     hide(): void;
@@ -31,6 +32,12 @@ export declare class StatusBarCharacterVSCode implements IStatusBarCharacter {
     private updateAnimationFrame;
     private updateStatusBarText;
     private getAnimatedCharacter;
+    /**
+     * Get the appropriate SVG icon file name based on the current state
+     * @param state The current Kiro state
+     * @returns The SVG file name to use
+     */
+    private getSvgIconForState;
     private getStateText;
     private setupErrorHandling;
     private enableMinimalMode;

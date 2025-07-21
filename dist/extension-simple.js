@@ -39,6 +39,7 @@ const vscode = __importStar(require("vscode"));
 const NotificationManager_1 = require("./notifications/NotificationManager");
 const KiroTaskMonitor_1 = require("./monitoring/KiroTaskMonitor");
 const icons_1 = require("./utils/icons");
+const kiro_pixel_art_1 = require("./kiro-pixel-art");
 let statusBarItem;
 let animationTimer;
 let animationFrame = 0;
@@ -56,8 +57,8 @@ function activate(context) {
     statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
     statusBarItem.command = 'kiro-chan.openSettings';
     statusBarItem.tooltip = 'Kiro Character - Click for settings';
-    // Show immediately with Codicon (no emojis)
-    statusBarItem.text = '$(ghost) Kiro';
+    // Show immediately with custom icon
+    statusBarItem.text = `${kiro_pixel_art_1.KiroPixelArt.getSVGLike('normal')} Kiro`;
     statusBarItem.show();
     console.log('✅ Status bar item created and shown');
     // Start monitoring for task completion
@@ -72,21 +73,21 @@ function activate(context) {
         vscode.commands.executeCommand('workbench.action.openSettings', 'kiro-chan');
     });
     const setIdleCommand = vscode.commands.registerCommand('kiro-chan.setIdle', () => {
-        statusBarItem.text = '$(ghost) Kiro (Idle)';
+        statusBarItem.text = `${kiro_pixel_art_1.KiroPixelArt.getSVGLike('idle')} Kiro (Idle)`;
         vscode.window.showInformationMessage('Kiro: Idle state');
     });
     const setActiveCommand = vscode.commands.registerCommand('kiro-chan.setActive', () => {
-        statusBarItem.text = '$(zap) Kiro (Active)';
+        statusBarItem.text = `${kiro_pixel_art_1.KiroPixelArt.getSVGLike('active')} Kiro (Active)`;
         vscode.window.showInformationMessage('Kiro: Active state');
     });
     const setErrorCommand = vscode.commands.registerCommand('kiro-chan.setError', () => {
-        statusBarItem.text = '$(warning) Kiro (Error)';
+        statusBarItem.text = `${kiro_pixel_art_1.KiroPixelArt.getSVGLike('error')} Kiro (Error)`;
         vscode.window.showInformationMessage('Kiro: Error state');
     });
     // Task completion command
     const taskCompletedCommand = vscode.commands.registerCommand('kiro-chan.taskCompleted', async () => {
         await taskMonitor.markTaskCompleted('Manual Task');
-        statusBarItem.text = '$(check) Kiro (Completed)';
+        statusBarItem.text = `${kiro_pixel_art_1.KiroPixelArt.getSVGLike('complete')} Kiro (Completed)`;
     });
     // Test notification command
     const testNotificationCommand = vscode.commands.registerCommand('kiro-chan.testNotification', async () => {
@@ -119,7 +120,7 @@ function startAnimation() {
         animationFrame = (animationFrame + 1) % 4;
         // Subtle animation with dots instead of emojis
         const dots = '.'.repeat((animationFrame % 3) + 1);
-        statusBarItem.text = `$(ghost) Kiro${dots}`;
+        statusBarItem.text = `${kiro_pixel_art_1.KiroPixelArt.getSVGLike('normal')} Kiro${dots}`;
     }, 1000); // 1 second intervals
 }
 function setupSoundVisualFeedback() {
@@ -138,19 +139,19 @@ function showSoundVisualFeedback(soundType) {
     // Show visual feedback with text changes instead of emoji changes
     switch (soundType) {
         case 'success':
-            statusBarItem.text = '$(check) Kiro [OK]';
+            statusBarItem.text = `${kiro_pixel_art_1.KiroPixelArt.getSVGLike('normal')} Kiro [OK]`;
             break;
         case 'completion':
-            statusBarItem.text = '$(check-all) Kiro [DONE]';
+            statusBarItem.text = `${kiro_pixel_art_1.KiroPixelArt.getSVGLike('complete')} Kiro [DONE]`;
             break;
         case 'notification':
-            statusBarItem.text = '$(bell) Kiro [INFO]';
+            statusBarItem.text = `${kiro_pixel_art_1.KiroPixelArt.getSVGLike('normal')} Kiro [INFO]`;
             break;
         case 'celebration':
-            statusBarItem.text = '$(star) Kiro [YAY]';
+            statusBarItem.text = `${kiro_pixel_art_1.KiroPixelArt.getSVGLike('complete')} Kiro [YAY]`;
             break;
         default:
-            statusBarItem.text = '$(unmute) Kiro [SND]';
+            statusBarItem.text = `${kiro_pixel_art_1.KiroPixelArt.getSVGLike('normal')} Kiro [SND]`;
     }
     // Restore original text after a short delay
     setTimeout(() => {
@@ -176,4 +177,3 @@ function deactivate() {
     }
     console.log('✅ Kiro-Chan extension deactivated');
 }
-//# sourceMappingURL=extension-simple.js.map
