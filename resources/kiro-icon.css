@@ -1,0 +1,12 @@
+@font-face {
+    font-family: 'kiro-icons';
+    src: url(data:application/font-woff2;charset=utf-8;base64,d09GMgABAAAAAANQAA4AAAAABswAAAL9AAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP0ZGVE0cGh4GYACCUhEICjgJCAE2AiQDCAsGAAQgBYNuByAb1wXIHpIkKQr/nwqCGAEbB9gGABGqCqpW9ez58z9wgCIOo6HBMBqKhtEwGsZDhmE0tH9vAf//n3P3voh+I5I8mkUiJItl05DYSNRMl0z+EkmTP+y3eu++ZUmW5EIyyaZmGkmJh0JDpJGQSKN7Ksnb5JKlaWhEtGgkIdLQLPHoP2e6vemw6RpJJAudSF1jViQiqUciETJRN9O8kkzzWYvETDRoESRKEhqpJjDSStW9G2o4u7nQxhxohBghhsAAAFABd+8NiFoBAQcAAAAuMC4wLjABAAPgAPDg4+Xn5uvh6+Pr5Onn4eXm6+Tj4OLh4+Xi5+bl5u3k5OXm7uTp5+Hl5urg5uXg5uPp4AAAAABJAA==) format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* Define the icon character */
+.kiro-icon:before {
+    content: '\e900';
+    font-family: 'kiro-icons';
+}

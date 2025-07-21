@@ -16,25 +16,29 @@
       "kiro-icon": {
         "description": "Kiro character icon",
         "default": {
-          "fontPath": "./images/kiro_1.svg"
+          "fontPath": "./resources/kiro.woff",
+          "fontCharacter": ""
         }
       },
       "kiro-idle": {
         "description": "Kiro character in idle state",
         "default": {
-          "fontPath": "./images/kiro_1.svg"
+          "fontPath": "./resources/kiro.woff",
+          "fontCharacter": ""
         }
       },
       "kiro-active": {
         "description": "Kiro character in active state",
         "default": {
-          "fontPath": "./images/kiro_1.svg"
+          "fontPath": "./resources/kiro.woff",
+          "fontCharacter": ""
         }
       },
       "kiro-error": {
         "description": "Kiro character in error state",
         "default": {
-          "fontPath": "./images/kiro_1.svg"
+          "fontPath": "./resources/kiro.woff",
+          "fontCharacter": ""
         }
       }
     },
