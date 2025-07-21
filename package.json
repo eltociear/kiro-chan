@@ -7,6 +7,7 @@
   "categories": [
     "Other"
   ],
+  "icon": "logo.png",
   "activationEvents": [
     "onStartupFinished"
   ],
@@ -15,7 +16,25 @@
       "kiro-icon": {
         "description": "Kiro character icon",
         "default": {
-          "fontPath": "./images/kiro.svg"
+          "fontPath": "./images/kiro_1.svg"
+        }
+      },
+      "kiro-idle": {
+        "description": "Kiro character in idle state",
+        "default": {
+          "fontPath": "./images/kiro_1.svg"
+        }
+      },
+      "kiro-active": {
+        "description": "Kiro character in active state",
+        "default": {
+          "fontPath": "./images/kiro_1.svg"
+        }
+      },
+      "kiro-error": {
+        "description": "Kiro character in error state",
+        "default": {
+          "fontPath": "./images/kiro_1.svg"
         }
       }
     },
@@ -92,6 +111,11 @@
           "minimum": 0,
           "maximum": 1,
           "description": "Sound volume (0.0 to 1.0)"
+        },
+        "kiro-chan.useSvgIcon": {
+          "type": "boolean",
+          "default": true,
+          "description": "Use SVG icon instead of emoji characters in the status bar"
         }
       }
     }
@@ -112,13 +136,15 @@
   "main": "dist/extension-simple.js",
   "files": [
     "dist/**/*",
-    "images/**/*"
+    "images/**/*",
+    "images/kiro_1.svg"
   ],
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
     "test:watch": "jest --watch",
+    "test:svg-icon": "node ./test-svg-icon.js",
     "package": "node -r ./suppress-warnings.js -e \"require('child_process').execSync('npx vsce package', {stdio: 'inherit'})\"",
     "package-quiet": "node --no-warnings -r ./suppress-warnings.js -e \"require('child_process').execSync('npx vsce package', {stdio: 'inherit'})\""
   },

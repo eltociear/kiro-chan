@@ -6,6 +6,7 @@ import { StateAnimationBridge } from './state/StateAnimationBridge';
 import { SettingsManager } from './settings/SettingsManager';
 import { PerformanceOptimizer } from './performance/PerformanceOptimizer';
 import { ErrorHandler, ErrorContext } from './error/ErrorHandler';
+import { SvgIconUtils } from './utils/SvgIconUtils';
 
 export class StatusBarCharacterVSCode implements IStatusBarCharacter {
   private statusBarItem: vscode.StatusBarItem;
@@ -18,14 +19,16 @@ export class StatusBarCharacterVSCode implements IStatusBarCharacter {
   private isInitialized: boolean = false;
   private animationInterval: NodeJS.Timeout | null = null;
   private currentAnimationFrame: number = 0;
+  private extensionContext: vscode.ExtensionContext | undefined;
 
-  constructor() {
+  constructor(context?: vscode.ExtensionContext) {
     this.errorHandler = ErrorHandler.getInstance();
     this.settingsManager = new SettingsManager();
     this.performanceOptimizer = new PerformanceOptimizer();
     this.animationController = new AnimationController(undefined, this.performanceOptimizer);
     this.stateMonitor = new StateMonitor();
     this.stateAnimationBridge = new StateAnimationBridge(this.stateMonitor, this.animationController);
+    this.extensionContext = context;
     
     // Create VS Code status bar item
     this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
@@ -196,17 +199,41 @@ export class StatusBarCharacterVSCode implements IStatusBarCharacter {
   }
 
   private updateStatusBarText(state: KiroState): void {
-    const character = this.getAnimatedCharacter(state);
     const stateText = this.getStateText(state);
     
-    this.statusBarItem.text = `${character} Kiro`;
-    this.statusBarItem.tooltip = `Kiro Character (${stateText}) - Click to open settings`;
+    try {
+      if (this.extensionContext) {
+        // Use SVG icon if extension context is available
+        this.statusBarItem.text = SvgIconUtils.getStatusBarTextWithIcon(
+          this.extensionContext,
+          'kiro_1.svg',
+          'Kiro',
+          this.getAnimatedCharacter(state) // Fallback to emoji if SVG fails
+        );
+      } else {
+        // Fallback to emoji character if no extension context
+        const character = this.getAnimatedCharacter(state);
+        this.statusBarItem.text = `${character} Kiro`;
+      }
+      
+      this.statusBarItem.tooltip = `Kiro Character (${stateText}) - Click to open settings`;
+    } catch (error) {
+      // If any error occurs, fall back to the emoji character
+      const character = this.getAnimatedCharacter(state);
+      this.statusBarItem.text = `${character} Kiro`;
+      this.statusBarItem.tooltip = `Kiro Character (${stateText}) - Click to open settings`;
+      
+      this.errorHandler.handleError(error as Error, ErrorContext.DOM_MANIPULATION, {
+        action: 'updateStatusBarText'
+      });
+    }
   }
 
   private getAnimatedCharacter(state: KiroState): string {
     const baseCharacter = '👻';
     
     // Simple text-based animation by rotating through variations
+    // This is used as a fallback when SVG icon cannot be displayed
     const frame = this.currentAnimationFrame % 4;
     
     switch (state) {
@@ -226,6 +253,17 @@ export class StatusBarCharacterVSCode implements IStatusBarCharacter {
       default:
         return baseCharacter;
     }
+  }
+  
+  /**
+   * Get the appropriate SVG icon file name based on the current state
+   * @param state The current Kiro state
+   * @returns The SVG file name to use
+   */
+  private getSvgIconForState(state: KiroState): string {
+    // For now, we're using a single SVG icon for all states
+    // In the future, we could have different SVG icons for different states
+    return 'kiro_1.svg';
   }
 
   private getStateText(state: KiroState): string {
