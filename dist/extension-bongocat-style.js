@@ -9,6 +9,9 @@ let activeAnimationTimer;
 let animationFrame = 0;
 let statusBarVisible = true;
 let isActiveState = false;
+let lastActivityTime = Date.now();
+let inactivityCheckTimer;
+const TASK_COMPLETE_THRESHOLD = 10000; // 10 seconds of inactivity = task complete
 // Icon states for different Kiro animations
 const KIRO_ICONS = {
     idle: 'kiro-idle', // \e900
@@ -42,6 +45,8 @@ function activate(context) {
     // Listen for text document changes (similar to BongoCat)
     const textChangeDisposable = vscode.workspace.onDidChangeTextDocument((event) => {
         if (statusBarVisible && event.contentChanges.length > 0) {
+            // Update last activity time
+            lastActivityTime = Date.now();
             // Switch to active animation sequence when typing
             startActiveAnimation();
             // Reset to standby animation after delay
@@ -53,6 +58,8 @@ function activate(context) {
             }, 2000);
         }
     });
+    // Start inactivity checker
+    startInactivityChecker(context);
     // Register commands
     const toggleCommand = vscode.commands.registerCommand('kiro-chan.toggleStatusBar', () => {
         statusBarVisible = !statusBarVisible;
@@ -137,6 +144,36 @@ function stopAllAnimations() {
         clearTimeout(activeAnimationTimer);
         activeAnimationTimer = undefined;
     }
+    if (inactivityCheckTimer) {
+        clearInterval(inactivityCheckTimer);
+        inactivityCheckTimer = undefined;
+    }
+}
+function startInactivityChecker(context) {
+    // Check for inactivity every second
+    inactivityCheckTimer = setInterval(() => {
+        const timeSinceLastActivity = Date.now() - lastActivityTime;
+        // If user has been inactive for threshold time, show task complete notification
+        if (timeSinceLastActivity >= TASK_COMPLETE_THRESHOLD && isActiveState === false) {
+            // Get notification setting
+            const config = vscode.workspace.getConfiguration('kiro-chan');
+            const notificationEnabled = config.get('notificationEnabled', true);
+            if (notificationEnabled) {
+                // Show OS native notification
+                vscode.window.showInformationMessage('🎉 Kiro Task Complete! Great job!', { modal: false }).then(() => {
+                    // Optional: Change to complete animation briefly
+                    updateStatusBarIcon(KIRO_ICONS.complete);
+                    setTimeout(() => {
+                        if (!isActiveState) {
+                            startStandbyAnimation();
+                        }
+                    }, 3000);
+                });
+                // Reset last activity time to prevent repeated notifications
+                lastActivityTime = Date.now();
+            }
+        }
+    }, 1000);
 }
 function deactivate() {
     console.log('🛑 Kiro-Chan BongoCat-style extension is deactivating...');
