@@ -97,8 +97,9 @@ function activate(context) {
 function updateStatusBarIcon(iconName) {
     if (statusBarItem) {
         // Use the BongoCat-style $(icon-name) format
-        statusBarItem.text = `$(${iconName}) Kiro`;
-        console.log(`Updated status bar icon to: $(${iconName})`);
+        const appName = vscode.env.appName;
+        statusBarItem.text = `$(${iconName}) ${appName}`;
+        console.log(`Updated status bar icon to: $(${iconName}) ${appName}`);
     }
 }
 function showStatusBar() {
