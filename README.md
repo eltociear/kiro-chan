@@ -8,6 +8,7 @@ A VS Code extension that displays an animated Kiro character in the status bar u
 - **Two Animation Modes**:
   - **Active State**: Fast animation when typing
   - **Standby State**: Slow animation when idle
+- **Text Color Customization**: Change Kiro's text color with color picker or HEX codes
 - **Task Completion Notifications**: Shows OS native notification after 10 seconds of inactivity
 - **Customizable Settings**: Control animations, notifications, and appearance
 
@@ -16,7 +17,8 @@ A VS Code extension that displays an animated Kiro character in the status bar u
 1. **Auto Start**: Kiro appears in the status bar when VS Code starts
 2. **Animation**: Automatically switches to active animation when typing
 3. **Toggle**: Click on Kiro in the status bar to show/hide
-4. **Task Complete**: Get notified when you've been inactive for 10 seconds
+4. **Text Color**: Customize Kiro's text color from VS Code settings
+5. **Task Complete**: Get notified when you've been inactive for 10 seconds
 
 ## Settings
 
@@ -27,9 +29,18 @@ Configure in VS Code settings (`settings.json`):
   "kiro-chan.enabled": true,
   "kiro-chan.animationSpeed": 1.0,
   "kiro-chan.useSvgIcon": true,
-  "kiro-chan.notificationEnabled": true
+  "kiro-chan.notificationEnabled": true,
+  "kiro-chan.backgroundColor": "#007ACC"
 }
 ```
+
+### Text Color Settings
+
+- **Default Color**: Blue (`#007ACC`)
+- **Setting Method**: Go to VS Code Settings → Extensions → Kiro Chan → Background Color
+- **Color Format**: Use color picker or enter HEX color codes (e.g., `#FF5733`, `#00FF00`)
+- **Real-time Update**: Changes apply immediately without restart
+- **Note**: The "Background Color" setting now controls the text color of Kiro character
 
 ## Development
 

@@ -112,12 +112,19 @@
           "type": "boolean",
           "default": true,
           "description": "Use SVG icon instead of emoji characters in the status bar"
+        },
+        "kiro-chan.backgroundColor": {
+          "type": "string",
+          "default": "#007ACC",
+          "description": "Kiroキャラクターの背景色（HEX形式）",
+          "pattern": "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$",
+          "patternErrorMessage": "有効なHEX色コードを入力してください（例: #007ACC）"
         }
       }
     }
   },
   "publisher": "eltociear",
-  "version": "1.1.4",
+  "version": "1.1.7",
   "description": "Kiro character extension with SVG-based icons in status bar - BongoCat style implementation",
   "repository": "https://github.com/eltociear/kiro-chan.git",
   "license": "MIT",

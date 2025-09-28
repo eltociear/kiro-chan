@@ -12,7 +12,8 @@ export class SettingsManager implements ISettingsManager {
     return {
       enabled: true,
       animationSpeed: 1.0,
-      position: 'right'
+      position: 'right',
+      backgroundColor: '#007ACC'
     };
   }
 
@@ -41,6 +42,22 @@ export class SettingsManager implements ISettingsManager {
 
   setPosition(position: 'left' | 'right'): void {
     this.settings.position = position;
+  }
+
+  getBackgroundColor(): string {
+    return this.settings.backgroundColor;
+  }
+
+  setBackgroundColor(color: string): void {
+    if (!this.validateBackgroundColor(color)) {
+      throw new Error('Invalid background color format. Please use HEX format (e.g., #007ACC)');
+    }
+    this.settings.backgroundColor = color;
+  }
+
+  private validateBackgroundColor(color: string): boolean {
+    const hexColorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
+    return hexColorRegex.test(color);
   }
 
   async loadSettings(): Promise<void> {
@@ -80,6 +97,11 @@ export class SettingsManager implements ISettingsManager {
     
     if (this.settings.position !== 'left' && this.settings.position !== 'right') {
       this.settings.position = 'right';
+    }
+    
+    if (typeof this.settings.backgroundColor !== 'string' || 
+        !this.validateBackgroundColor(this.settings.backgroundColor)) {
+      this.settings.backgroundColor = '#007ACC';
     }
   }
 

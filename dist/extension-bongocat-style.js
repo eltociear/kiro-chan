@@ -1,8 +1,41 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.activate = activate;
 exports.deactivate = deactivate;
-const vscode = require("vscode");
+const vscode = __importStar(require("vscode"));
 let statusBarItem;
 let animationTimer;
 let activeAnimationTimer;
@@ -60,6 +93,13 @@ function activate(context) {
     });
     // Start inactivity checker
     startInactivityChecker(context);
+    // Listen for configuration changes
+    const configChangeDisposable = vscode.workspace.onDidChangeConfiguration((event) => {
+        if (event.affectsConfiguration('kiro-chan.backgroundColor')) {
+            console.log('Background color setting changed, updating status bar...');
+            applyBackgroundColor();
+        }
+    });
     // Register commands
     const toggleCommand = vscode.commands.registerCommand('kiro-chan.toggleStatusBar', () => {
         statusBarVisible = !statusBarVisible;
@@ -91,7 +131,7 @@ function activate(context) {
         vscode.window.showInformationMessage('Kiro: Task completed!');
     });
     // Add to subscriptions
-    context.subscriptions.push(statusBarItem, textChangeDisposable, toggleCommand, setIdleCommand, setActiveCommand, setErrorCommand, setCompleteCommand);
+    context.subscriptions.push(statusBarItem, textChangeDisposable, configChangeDisposable, toggleCommand, setIdleCommand, setActiveCommand, setErrorCommand, setCompleteCommand);
     console.log('✅ Kiro-Chan BongoCat-style extension activated successfully!');
 }
 function updateStatusBarIcon(iconName) {
@@ -99,8 +139,23 @@ function updateStatusBarIcon(iconName) {
         // Use the BongoCat-style $(icon-name) format
         const appName = vscode.env.appName;
         statusBarItem.text = `$(${iconName}) ${appName}`;
+        // Apply text color based on backgroundColor setting
+        applyTextColor();
         console.log(`Updated status bar icon to: $(${iconName}) ${appName}`);
     }
+}
+function applyTextColor() {
+    if (statusBarItem) {
+        const config = vscode.workspace.getConfiguration('kiro-chan');
+        const backgroundColor = config.get('backgroundColor', '#007ACC');
+        // Apply the color directly to the status bar item
+        statusBarItem.color = backgroundColor;
+        console.log(`Applied text color: ${backgroundColor}`);
+    }
+}
+function applyBackgroundColor() {
+    // Apply text color changes
+    applyTextColor();
 }
 function showStatusBar() {
     if (statusBarItem) {
@@ -184,3 +239,4 @@ function deactivate() {
     }
     console.log('✅ Kiro-Chan BongoCat-style extension deactivated');
 }
+//# sourceMappingURL=extension-bongocat-style.js.map

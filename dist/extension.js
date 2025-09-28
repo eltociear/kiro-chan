@@ -107,8 +107,7 @@ function updateStatusBar() {
     try {
         if (extensionContext) {
             // Use SVG icon if extension context is available
-            statusBarItem.text = SvgIconUtils_1.SvgIconUtils.getStatusBarTextWithIcon(extensionContext, 'kiro_1.svg', 'Kiro', getAnimatedCharacter() // Fallback to emoji if SVG fails
-            );
+            statusBarItem.text = SvgIconUtils_1.SvgIconUtils.getStatusBarTextWithIcon(extensionContext, 'idle', 'Kiro');
         }
         else {
             // Fallback to emoji character if no extension context

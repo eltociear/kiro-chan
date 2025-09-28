@@ -206,9 +206,8 @@ export class StatusBarCharacterVSCode implements IStatusBarCharacter {
         // Use SVG icon if extension context is available
         this.statusBarItem.text = SvgIconUtils.getStatusBarTextWithIcon(
           this.extensionContext,
-          'kiro_1.svg',
-          'Kiro',
-          this.getAnimatedCharacter(state) // Fallback to emoji if SVG fails
+          state.toLowerCase(),
+          'Kiro'
         );
       } else {
         // Fallback to emoji character if no extension context

@@ -69,6 +69,14 @@ export function activate(context: vscode.ExtensionContext) {
     // Start inactivity checker
     startInactivityChecker(context);
     
+    // Listen for configuration changes
+    const configChangeDisposable = vscode.workspace.onDidChangeConfiguration((event) => {
+        if (event.affectsConfiguration('kiro-chan.backgroundColor')) {
+            console.log('Background color setting changed, updating status bar...');
+            applyBackgroundColor();
+        }
+    });
+    
     // Register commands
     const toggleCommand = vscode.commands.registerCommand('kiro-chan.toggleStatusBar', () => {
         statusBarVisible = !statusBarVisible;
@@ -107,6 +115,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         statusBarItem,
         textChangeDisposable,
+        configChangeDisposable,
         toggleCommand,
         setIdleCommand,
         setActiveCommand,
@@ -122,9 +131,34 @@ function updateStatusBarIcon(iconName: string) {
         // Use the BongoCat-style $(icon-name) format
         const appName = vscode.env.appName;
         statusBarItem.text = `$(${iconName}) ${appName}`;
+        
+        // Apply text color based on backgroundColor setting
+        applyTextColor();
+        
         console.log(`Updated status bar icon to: $(${iconName}) ${appName}`);
     }
 }
+
+function applyTextColor() {
+    if (statusBarItem) {
+        const config = vscode.workspace.getConfiguration('kiro-chan');
+        const backgroundColor = config.get('backgroundColor', '#007ACC');
+        
+        // Apply the color directly to the status bar item
+        statusBarItem.color = backgroundColor;
+        
+        console.log(`Applied text color: ${backgroundColor}`);
+    }
+}
+
+
+
+function applyBackgroundColor() {
+    // Apply text color changes
+    applyTextColor();
+}
+
+
 
 function showStatusBar() {
     if (statusBarItem) {

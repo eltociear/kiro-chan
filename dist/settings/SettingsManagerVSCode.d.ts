@@ -10,6 +10,8 @@ export declare class SettingsManagerVSCode implements ISettingsManager {
     setPosition(position: 'left' | 'right'): void;
     loadSettings(): Promise<void>;
     saveSettings(): Promise<void>;
+    getBackgroundColor(): string;
+    setBackgroundColor(color: string): void;
     getSettings(): CharacterSettings;
     onConfigurationChanged(callback: () => void): vscode.Disposable;
 }
