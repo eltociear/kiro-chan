@@ -39,6 +39,8 @@ const vscode = __importStar(require("vscode"));
 let statusBarItem;
 let animationTimer;
 let activeAnimationTimer;
+let colorMaintainTimer;
+let hoverDetectionTimer;
 let animationFrame = 0;
 let statusBarVisible = true;
 let isActiveState = false;
@@ -73,6 +75,10 @@ function activate(context) {
     // Show initial state
     updateStatusBarIcon(KIRO_ICONS.complete);
     showStatusBar();
+    // Start color maintenance to prevent hover effects
+    startColorMaintenance();
+    // Start hover detection for immediate color restoration
+    startHoverDetection();
     // Start standby animation
     startStandbyAnimation();
     // Listen for text document changes (similar to BongoCat)
@@ -95,9 +101,9 @@ function activate(context) {
     startInactivityChecker(context);
     // Listen for configuration changes
     const configChangeDisposable = vscode.workspace.onDidChangeConfiguration((event) => {
-        if (event.affectsConfiguration('kiro-chan.backgroundColor')) {
-            console.log('Background color setting changed, updating status bar...');
-            applyBackgroundColor();
+        if (event.affectsConfiguration('kiro-chan.displayColor')) {
+            console.log('Display color setting changed, updating status bar...');
+            applyDisplayColor();
         }
     });
     // Register commands
@@ -141,19 +147,89 @@ function updateStatusBarIcon(iconName) {
         statusBarItem.text = `$(${iconName}) ${appName}`;
         // Apply text color based on backgroundColor setting
         applyTextColor();
+        // Force re-apply color multiple times after text update
+        setTimeout(() => {
+            applyTextColor();
+        }, 1);
+        setTimeout(() => {
+            applyTextColor();
+        }, 10);
+        setTimeout(() => {
+            applyTextColor();
+        }, 50);
         console.log(`Updated status bar icon to: $(${iconName}) ${appName}`);
     }
 }
 function applyTextColor() {
     if (statusBarItem) {
         const config = vscode.workspace.getConfiguration('kiro-chan');
-        const backgroundColor = config.get('backgroundColor', '#007ACC');
-        // Apply the color directly to the status bar item
-        statusBarItem.color = backgroundColor;
-        console.log(`Applied text color: ${backgroundColor}`);
+        const displayColor = config.get('displayColor', '#FFFFFF');
+        // Apply the color multiple times to ensure it sticks
+        statusBarItem.color = displayColor;
+        statusBarItem.color = displayColor;
+        statusBarItem.color = displayColor;
+        // Force immediate re-application
+        setTimeout(() => {
+            if (statusBarItem) {
+                statusBarItem.color = displayColor;
+                statusBarItem.color = displayColor;
+            }
+        }, 1);
+        console.log(`Applied display color: ${displayColor}`);
     }
 }
-function applyBackgroundColor() {
+function startColorMaintenance() {
+    // Continuously re-apply color to prevent hover effects from overriding it
+    if (colorMaintainTimer) {
+        clearInterval(colorMaintainTimer);
+    }
+    colorMaintainTimer = setInterval(() => {
+        if (statusBarItem && statusBarVisible) {
+            const config = vscode.workspace.getConfiguration('kiro-chan');
+            const displayColor = config.get('displayColor', '#FFFFFF');
+            // Force re-apply color multiple times to maintain consistency
+            statusBarItem.color = displayColor;
+            statusBarItem.color = displayColor;
+            statusBarItem.color = displayColor;
+            // Additional immediate re-application
+            setTimeout(() => {
+                if (statusBarItem) {
+                    statusBarItem.color = displayColor;
+                }
+            }, 1);
+        }
+    }, 25); // Re-apply color every 25ms for more aggressive override of hover effects
+}
+function startHoverDetection() {
+    // Ultra-fast hover detection and color restoration
+    if (hoverDetectionTimer) {
+        clearInterval(hoverDetectionTimer);
+    }
+    hoverDetectionTimer = setInterval(() => {
+        if (statusBarItem && statusBarVisible) {
+            const config = vscode.workspace.getConfiguration('kiro-chan');
+            const displayColor = config.get('displayColor', '#FFFFFF');
+            // Aggressively restore color to counter any hover effects
+            for (let i = 0; i < 5; i++) {
+                statusBarItem.color = displayColor;
+            }
+            // Multiple delayed re-applications
+            setTimeout(() => {
+                if (statusBarItem) {
+                    for (let i = 0; i < 3; i++) {
+                        statusBarItem.color = displayColor;
+                    }
+                }
+            }, 1);
+            setTimeout(() => {
+                if (statusBarItem) {
+                    statusBarItem.color = displayColor;
+                }
+            }, 5);
+        }
+    }, 10); // Check and restore color every 10ms for maximum responsiveness
+}
+function applyDisplayColor() {
     // Apply text color changes
     applyTextColor();
 }
@@ -203,6 +279,14 @@ function stopAllAnimations() {
     if (inactivityCheckTimer) {
         clearInterval(inactivityCheckTimer);
         inactivityCheckTimer = undefined;
+    }
+    if (colorMaintainTimer) {
+        clearInterval(colorMaintainTimer);
+        colorMaintainTimer = undefined;
+    }
+    if (hoverDetectionTimer) {
+        clearInterval(hoverDetectionTimer);
+        hoverDetectionTimer = undefined;
     }
 }
 function startInactivityChecker(context) {
