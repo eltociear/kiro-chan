@@ -45,6 +45,7 @@ export interface CharacterSettings {
     enabled: boolean;
     animationSpeed: number;
     position: 'left' | 'right';
+    backgroundColor: string;
 }
 export interface CharacterState {
     isVisible: boolean;

@@ -1,1 +1,1 @@
-{"version":3,"file":"extension-bongocat-style.d.ts","sourceRoot":"","sources":["../src/extension-bongocat-style.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,MAAM,MAAM,QAAQ,CAAC;AAkCjC,wBAAgB,QAAQ,CAAC,OAAO,EAAE,MAAM,CAAC,gBAAgB,QAmFxD;AAmGD,wBAAgB,UAAU,SAUzB"}
+{"version":3,"file":"extension-bongocat-style.d.ts","sourceRoot":"","sources":["../src/extension-bongocat-style.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,MAAM,MAAM,QAAQ,CAAC;AAoCjC,wBAAgB,QAAQ,CAAC,OAAO,EAAE,MAAM,CAAC,gBAAgB,QAkGxD;AAuND,wBAAgB,UAAU,SAUzB"}

@@ -17,7 +17,8 @@
       "WebFetch(domain:api.github.com)",
       "Bash(cp:*)",
       "Bash(ls:*)",
-      "Bash(npx vsce package:*)"
+      "Bash(npx vsce package:*)",
+      "Bash(cat:*)"
     ],
     "deny": []
   }

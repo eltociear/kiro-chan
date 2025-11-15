@@ -10,7 +10,8 @@ class SettingsManager {
         return {
             enabled: true,
             animationSpeed: 1.0,
-            position: 'right'
+            position: 'right',
+            backgroundColor: '#007ACC'
         };
     }
     isEnabled() {
@@ -33,6 +34,19 @@ class SettingsManager {
     }
     setPosition(position) {
         this.settings.position = position;
+    }
+    getBackgroundColor() {
+        return this.settings.backgroundColor;
+    }
+    setBackgroundColor(color) {
+        if (!this.validateBackgroundColor(color)) {
+            throw new Error('Invalid background color format. Please use HEX format (e.g., #007ACC)');
+        }
+        this.settings.backgroundColor = color;
+    }
+    validateBackgroundColor(color) {
+        const hexColorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
+        return hexColorRegex.test(color);
     }
     async loadSettings() {
         try {
@@ -69,6 +83,10 @@ class SettingsManager {
         }
         if (this.settings.position !== 'left' && this.settings.position !== 'right') {
             this.settings.position = 'right';
+        }
+        if (typeof this.settings.backgroundColor !== 'string' ||
+            !this.validateBackgroundColor(this.settings.backgroundColor)) {
+            this.settings.backgroundColor = '#007ACC';
         }
     }
     getSettings() {

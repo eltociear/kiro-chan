@@ -75,11 +75,20 @@ class SettingsManagerVSCode {
         // VS Codeの設定は自動的に保存されるため、特別な処理は不要
         return Promise.resolve();
     }
+    getBackgroundColor() {
+        const config = vscode.workspace.getConfiguration(this.configSection);
+        return config.get('backgroundColor', '#007ACC');
+    }
+    setBackgroundColor(color) {
+        const config = vscode.workspace.getConfiguration(this.configSection);
+        config.update('backgroundColor', color, vscode.ConfigurationTarget.Global);
+    }
     getSettings() {
         return {
             enabled: this.isEnabled(),
             animationSpeed: this.getAnimationSpeed(),
-            position: this.getPosition()
+            position: this.getPosition(),
+            backgroundColor: this.getBackgroundColor()
         };
     }
     // VS Code設定変更の監視

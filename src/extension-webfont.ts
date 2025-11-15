@@ -33,12 +33,9 @@ export function activate(context: vscode.ExtensionContext) {
     // Register decoration type for custom rendering
     decorationType = vscode.window.createTextEditorDecorationType({
         before: {
-            contentText: '',
+            contentText: '👻',
             width: '16px',
-            height: '16px',
-            backgroundImage: vscode.Uri.file(path.join(context.extensionPath, 'images', 'kiro_1.svg')).toString(),
-            backgroundSize: 'contain',
-            backgroundRepeat: 'no-repeat'
+            height: '16px'
         }
     });
 

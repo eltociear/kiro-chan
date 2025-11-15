@@ -10,6 +10,9 @@ export declare class SettingsManager implements ISettingsManager {
     setAnimationSpeed(speed: number): void;
     getPosition(): 'left' | 'right';
     setPosition(position: 'left' | 'right'): void;
+    getBackgroundColor(): string;
+    setBackgroundColor(color: string): void;
+    private validateBackgroundColor;
     loadSettings(): Promise<void>;
     saveSettings(): Promise<void>;
     private validateSettings;

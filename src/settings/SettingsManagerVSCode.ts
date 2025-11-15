@@ -48,11 +48,22 @@ export class SettingsManagerVSCode implements ISettingsManager {
     return Promise.resolve();
   }
 
+  getBackgroundColor(): string {
+    const config = vscode.workspace.getConfiguration(this.configSection);
+    return config.get<string>('backgroundColor', '#007ACC');
+  }
+
+  setBackgroundColor(color: string): void {
+    const config = vscode.workspace.getConfiguration(this.configSection);
+    config.update('backgroundColor', color, vscode.ConfigurationTarget.Global);
+  }
+
   getSettings(): CharacterSettings {
     return {
       enabled: this.isEnabled(),
       animationSpeed: this.getAnimationSpeed(),
-      position: this.getPosition()
+      position: this.getPosition(),
+      backgroundColor: this.getBackgroundColor()
     };
   }
 

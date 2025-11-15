@@ -201,8 +201,7 @@ class StatusBarCharacterVSCode {
         try {
             if (this.extensionContext) {
                 // Use SVG icon if extension context is available
-                this.statusBarItem.text = SvgIconUtils_1.SvgIconUtils.getStatusBarTextWithIcon(this.extensionContext, 'kiro_1.svg', 'Kiro', this.getAnimatedCharacter(state) // Fallback to emoji if SVG fails
-                );
+                this.statusBarItem.text = SvgIconUtils_1.SvgIconUtils.getStatusBarTextWithIcon(this.extensionContext, state.toLowerCase(), 'Kiro');
             }
             else {
                 // Fallback to emoji character if no extension context
