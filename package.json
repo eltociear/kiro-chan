@@ -54,26 +54,6 @@
         "command": "kiro-chan.toggleStatusBar",
         "title": "Toggle Kiro Character",
         "category": "Kiro Chan"
-      },
-      {
-        "command": "kiro-chan.setIdle",
-        "title": "Set Idle State",
-        "category": "Kiro Chan"
-      },
-      {
-        "command": "kiro-chan.setActive",
-        "title": "Set Active State",
-        "category": "Kiro Chan"
-      },
-      {
-        "command": "kiro-chan.setError",
-        "title": "Set Error State",
-        "category": "Kiro Chan"
-      },
-      {
-        "command": "kiro-chan.setComplete",
-        "title": "Set Complete State",
-        "category": "Kiro Chan"
       }
     ],
     "configuration": {
@@ -118,13 +98,30 @@
           "default": "#FFFFFF",
           "format": "color",
           "description": "Kiroキャラクターと文字の表示色（HEX形式）"
+        },
+        "kiro-chan.rainbowMode": {
+          "type": "boolean",
+          "default": false,
+          "description": "虹色アニメーションモード - 有効にするとKiroキャラクターが絶えず虹色に変化します"
+        },
+        "kiro-chan.rainbowSpeed": {
+          "type": "number",
+          "default": 50,
+          "minimum": 10,
+          "maximum": 200,
+          "description": "虹色変化の速度（ミリ秒単位）- 小さいほど速く変化します"
+        },
+        "kiro-chan.diagnosticsEnabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "静的解析エラー表示 - 有効にするとエラーがある場合に背景色が赤くなります"
         }
       }
     }
   },
   "publisher": "eltociear",
-  "version": "1.1.11",
-  "description": "Kiro character extension with SVG-based icons in status bar - BongoCat style implementation",
+  "version": "1.2.0",
+  "description": "Your coding buddy that reacts to your code! Rainbow vibes when you're in the zone, turns RED when bugs appear. Never code alone again.",
   "repository": "https://github.com/eltociear/kiro-chan.git",
   "license": "MIT",
   "author": "Kiro Status Character Extension Contributors",

@@ -41,11 +41,16 @@ let animationTimer;
 let activeAnimationTimer;
 let colorMaintainTimer;
 let hoverDetectionTimer;
+let rainbowTimer;
+let diagnosticsDisposable;
+let activeEditorDisposable;
 let animationFrame = 0;
 let statusBarVisible = true;
 let isActiveState = false;
 let lastActivityTime = Date.now();
 let inactivityCheckTimer;
+let currentHue = 0;
+let hasErrors = false;
 const TASK_COMPLETE_THRESHOLD = 10000; // 10 seconds of inactivity = task complete
 // Icon states for different Kiro animations
 const KIRO_ICONS = {
@@ -81,6 +86,13 @@ function activate(context) {
     startHoverDetection();
     // Start standby animation
     startStandbyAnimation();
+    // Check if rainbow mode is enabled and start it
+    const config = vscode.workspace.getConfiguration('kiro-chan');
+    if (config.get('rainbowMode', false)) {
+        startRainbowAnimation();
+    }
+    // Setup diagnostics listener for error detection
+    setupDiagnosticsListener();
     // Listen for text document changes (similar to BongoCat)
     const textChangeDisposable = vscode.workspace.onDidChangeTextDocument((event) => {
         if (statusBarVisible && event.contentChanges.length > 0) {
@@ -105,6 +117,27 @@ function activate(context) {
             console.log('Display color setting changed, updating status bar...');
             applyDisplayColor();
         }
+        if (event.affectsConfiguration('kiro-chan.rainbowMode') || event.affectsConfiguration('kiro-chan.rainbowSpeed')) {
+            console.log('Rainbow mode setting changed, updating animation...');
+            const config = vscode.workspace.getConfiguration('kiro-chan');
+            const rainbowMode = config.get('rainbowMode', false);
+            if (rainbowMode) {
+                startRainbowAnimation();
+            }
+            else {
+                stopRainbowAnimation();
+            }
+        }
+        if (event.affectsConfiguration('kiro-chan.diagnosticsEnabled')) {
+            console.log('Diagnostics setting changed, updating...');
+            const config = vscode.workspace.getConfiguration('kiro-chan');
+            if (config.get('diagnosticsEnabled', true)) {
+                setupDiagnosticsListener();
+            }
+            else {
+                stopDiagnosticsListener();
+            }
+        }
     });
     // Register commands
     const toggleCommand = vscode.commands.registerCommand('kiro-chan.toggleStatusBar', () => {
@@ -120,24 +153,8 @@ function activate(context) {
             vscode.window.showInformationMessage('Kiro Character is now hidden');
         }
     });
-    const setIdleCommand = vscode.commands.registerCommand('kiro-chan.setIdle', () => {
-        updateStatusBarIcon(KIRO_ICONS.idle);
-        vscode.window.showInformationMessage('Kiro: Idle state');
-    });
-    const setActiveCommand = vscode.commands.registerCommand('kiro-chan.setActive', () => {
-        updateStatusBarIcon(KIRO_ICONS.active);
-        vscode.window.showInformationMessage('Kiro: Active state');
-    });
-    const setErrorCommand = vscode.commands.registerCommand('kiro-chan.setError', () => {
-        updateStatusBarIcon(KIRO_ICONS.error);
-        vscode.window.showInformationMessage('Kiro: Error state');
-    });
-    const setCompleteCommand = vscode.commands.registerCommand('kiro-chan.setComplete', () => {
-        updateStatusBarIcon(KIRO_ICONS.complete);
-        vscode.window.showInformationMessage('Kiro: Task completed!');
-    });
     // Add to subscriptions
-    context.subscriptions.push(statusBarItem, textChangeDisposable, configChangeDisposable, toggleCommand, setIdleCommand, setActiveCommand, setErrorCommand, setCompleteCommand);
+    context.subscriptions.push(statusBarItem, textChangeDisposable, configChangeDisposable, toggleCommand);
     console.log('✅ Kiro-Chan BongoCat-style extension activated successfully!');
 }
 function updateStatusBarIcon(iconName) {
@@ -163,6 +180,10 @@ function updateStatusBarIcon(iconName) {
 function applyTextColor() {
     if (statusBarItem) {
         const config = vscode.workspace.getConfiguration('kiro-chan');
+        // Skip if rainbow mode is enabled
+        if (config.get('rainbowMode', false)) {
+            return;
+        }
         const displayColor = config.get('displayColor', '#FFFFFF');
         // Apply the color multiple times to ensure it sticks
         statusBarItem.color = displayColor;
@@ -171,6 +192,10 @@ function applyTextColor() {
         // Force immediate re-application
         setTimeout(() => {
             if (statusBarItem) {
+                const config = vscode.workspace.getConfiguration('kiro-chan');
+                if (config.get('rainbowMode', false)) {
+                    return;
+                }
                 statusBarItem.color = displayColor;
                 statusBarItem.color = displayColor;
             }
@@ -183,9 +208,18 @@ function startColorMaintenance() {
     if (colorMaintainTimer) {
         clearInterval(colorMaintainTimer);
     }
+    // Don't start color maintenance if rainbow mode is enabled
+    const config = vscode.workspace.getConfiguration('kiro-chan');
+    if (config.get('rainbowMode', false)) {
+        return;
+    }
     colorMaintainTimer = setInterval(() => {
         if (statusBarItem && statusBarVisible) {
             const config = vscode.workspace.getConfiguration('kiro-chan');
+            // Skip if rainbow mode is enabled
+            if (config.get('rainbowMode', false)) {
+                return;
+            }
             const displayColor = config.get('displayColor', '#FFFFFF');
             // Force re-apply color multiple times to maintain consistency
             statusBarItem.color = displayColor;
@@ -194,6 +228,10 @@ function startColorMaintenance() {
             // Additional immediate re-application
             setTimeout(() => {
                 if (statusBarItem) {
+                    const config = vscode.workspace.getConfiguration('kiro-chan');
+                    if (config.get('rainbowMode', false)) {
+                        return;
+                    }
                     statusBarItem.color = displayColor;
                 }
             }, 1);
@@ -205,9 +243,18 @@ function startHoverDetection() {
     if (hoverDetectionTimer) {
         clearInterval(hoverDetectionTimer);
     }
+    // Don't start hover detection if rainbow mode is enabled
+    const config = vscode.workspace.getConfiguration('kiro-chan');
+    if (config.get('rainbowMode', false)) {
+        return;
+    }
     hoverDetectionTimer = setInterval(() => {
         if (statusBarItem && statusBarVisible) {
             const config = vscode.workspace.getConfiguration('kiro-chan');
+            // Skip if rainbow mode is enabled
+            if (config.get('rainbowMode', false)) {
+                return;
+            }
             const displayColor = config.get('displayColor', '#FFFFFF');
             // Aggressively restore color to counter any hover effects
             for (let i = 0; i < 5; i++) {
@@ -216,6 +263,10 @@ function startHoverDetection() {
             // Multiple delayed re-applications
             setTimeout(() => {
                 if (statusBarItem) {
+                    const config = vscode.workspace.getConfiguration('kiro-chan');
+                    if (config.get('rainbowMode', false)) {
+                        return;
+                    }
                     for (let i = 0; i < 3; i++) {
                         statusBarItem.color = displayColor;
                     }
@@ -223,6 +274,10 @@ function startHoverDetection() {
             }, 1);
             setTimeout(() => {
                 if (statusBarItem) {
+                    const config = vscode.workspace.getConfiguration('kiro-chan');
+                    if (config.get('rainbowMode', false)) {
+                        return;
+                    }
                     statusBarItem.color = displayColor;
                 }
             }, 5);
@@ -232,6 +287,140 @@ function startHoverDetection() {
 function applyDisplayColor() {
     // Apply text color changes
     applyTextColor();
+}
+// HSL to Hex conversion function
+function hslToHex(h, s, l) {
+    s /= 100;
+    l /= 100;
+    const a = s * Math.min(l, 1 - l);
+    const f = (n) => {
+        const k = (n + h / 30) % 12;
+        const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+        return Math.round(255 * color).toString(16).padStart(2, '0');
+    };
+    return `#${f(0)}${f(8)}${f(4)}`;
+}
+function startRainbowAnimation() {
+    const config = vscode.workspace.getConfiguration('kiro-chan');
+    const rainbowMode = config.get('rainbowMode', false);
+    if (!rainbowMode) {
+        stopRainbowAnimation();
+        return;
+    }
+    // Stop existing rainbow timer if any
+    if (rainbowTimer) {
+        clearInterval(rainbowTimer);
+    }
+    // Stop color maintenance and hover detection timers as rainbow mode overrides them
+    if (colorMaintainTimer) {
+        clearInterval(colorMaintainTimer);
+        colorMaintainTimer = undefined;
+    }
+    if (hoverDetectionTimer) {
+        clearInterval(hoverDetectionTimer);
+        hoverDetectionTimer = undefined;
+    }
+    const rainbowSpeed = config.get('rainbowSpeed', 50);
+    rainbowTimer = setInterval(() => {
+        if (statusBarItem && statusBarVisible) {
+            // Increment hue (0-360)
+            currentHue = (currentHue + 2) % 360;
+            // Convert HSL to Hex (high saturation and medium lightness for vibrant colors)
+            const rainbowColor = hslToHex(currentHue, 100, 50);
+            // Apply the rainbow color
+            statusBarItem.color = rainbowColor;
+        }
+    }, rainbowSpeed);
+    console.log(`Rainbow animation started with speed: ${rainbowSpeed}ms`);
+}
+function stopRainbowAnimation() {
+    if (rainbowTimer) {
+        clearInterval(rainbowTimer);
+        rainbowTimer = undefined;
+    }
+    // Restart color maintenance and hover detection
+    startColorMaintenance();
+    startHoverDetection();
+    // Apply the static display color
+    applyTextColor();
+    console.log('Rainbow animation stopped');
+}
+// Diagnostics functions
+function checkDiagnostics() {
+    const config = vscode.workspace.getConfiguration('kiro-chan');
+    if (!config.get('diagnosticsEnabled', true)) {
+        // If diagnostics disabled, clear background
+        if (statusBarItem) {
+            statusBarItem.backgroundColor = undefined;
+        }
+        hasErrors = false;
+        return;
+    }
+    const activeEditor = vscode.window.activeTextEditor;
+    if (!activeEditor) {
+        // No active editor, clear background
+        if (statusBarItem) {
+            statusBarItem.backgroundColor = undefined;
+        }
+        hasErrors = false;
+        return;
+    }
+    const uri = activeEditor.document.uri;
+    const diagnostics = vscode.languages.getDiagnostics(uri);
+    // Check for errors (DiagnosticSeverity.Error = 0)
+    const errorCount = diagnostics.filter(d => d.severity === vscode.DiagnosticSeverity.Error).length;
+    const warningCount = diagnostics.filter(d => d.severity === vscode.DiagnosticSeverity.Warning).length;
+    if (statusBarItem) {
+        if (errorCount > 0) {
+            // Has errors - red background
+            statusBarItem.backgroundColor = new vscode.ThemeColor('statusBarItem.errorBackground');
+            hasErrors = true;
+            console.log(`Diagnostics: ${errorCount} error(s) found`);
+        }
+        else if (warningCount > 0) {
+            // Has warnings - yellow/warning background
+            statusBarItem.backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
+            hasErrors = false;
+            console.log(`Diagnostics: ${warningCount} warning(s) found`);
+        }
+        else {
+            // No errors or warnings - clear background
+            statusBarItem.backgroundColor = undefined;
+            hasErrors = false;
+        }
+    }
+}
+function setupDiagnosticsListener() {
+    const config = vscode.workspace.getConfiguration('kiro-chan');
+    if (!config.get('diagnosticsEnabled', true)) {
+        return;
+    }
+    // Listen for diagnostics changes
+    diagnosticsDisposable = vscode.languages.onDidChangeDiagnostics(() => {
+        checkDiagnostics();
+    });
+    // Listen for active editor changes
+    activeEditorDisposable = vscode.window.onDidChangeActiveTextEditor(() => {
+        checkDiagnostics();
+    });
+    // Initial check
+    checkDiagnostics();
+    console.log('Diagnostics listener started');
+}
+function stopDiagnosticsListener() {
+    if (diagnosticsDisposable) {
+        diagnosticsDisposable.dispose();
+        diagnosticsDisposable = undefined;
+    }
+    if (activeEditorDisposable) {
+        activeEditorDisposable.dispose();
+        activeEditorDisposable = undefined;
+    }
+    if (statusBarItem) {
+        statusBarItem.backgroundColor = undefined;
+    }
+    hasErrors = false;
+    console.log('Diagnostics listener stopped');
 }
 function showStatusBar() {
     if (statusBarItem) {
@@ -268,6 +457,7 @@ function startStandbyAnimation() {
     }, 1500); // Slower animation when standby
 }
 function stopAllAnimations() {
+    // Stop icon animations only - rainbow animation is independent
     if (animationTimer) {
         clearInterval(animationTimer);
         animationTimer = undefined;
@@ -280,14 +470,19 @@ function stopAllAnimations() {
         clearInterval(inactivityCheckTimer);
         inactivityCheckTimer = undefined;
     }
-    if (colorMaintainTimer) {
-        clearInterval(colorMaintainTimer);
-        colorMaintainTimer = undefined;
+    // Only stop color timers if rainbow mode is not active
+    const config = vscode.workspace.getConfiguration('kiro-chan');
+    if (!config.get('rainbowMode', false)) {
+        if (colorMaintainTimer) {
+            clearInterval(colorMaintainTimer);
+            colorMaintainTimer = undefined;
+        }
+        if (hoverDetectionTimer) {
+            clearInterval(hoverDetectionTimer);
+            hoverDetectionTimer = undefined;
+        }
     }
-    if (hoverDetectionTimer) {
-        clearInterval(hoverDetectionTimer);
-        hoverDetectionTimer = undefined;
-    }
+    // Note: Rainbow timer is NOT stopped here - it runs independently
 }
 function startInactivityChecker(context) {
     // Check for inactivity every second
@@ -318,6 +513,13 @@ function startInactivityChecker(context) {
 function deactivate() {
     console.log('🛑 Kiro-Chan BongoCat-style extension is deactivating...');
     stopAllAnimations();
+    // Also stop rainbow timer on deactivate
+    if (rainbowTimer) {
+        clearInterval(rainbowTimer);
+        rainbowTimer = undefined;
+    }
+    // Stop diagnostics listener
+    stopDiagnosticsListener();
     if (statusBarItem) {
         statusBarItem.dispose();
     }
