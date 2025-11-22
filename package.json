@@ -118,12 +118,24 @@
           "default": "#FFFFFF",
           "format": "color",
           "description": "Kiroキャラクターと文字の表示色（HEX形式）"
+        },
+        "kiro-chan.rainbowMode": {
+          "type": "boolean",
+          "default": false,
+          "description": "虹色アニメーションモード - 有効にするとKiroキャラクターが絶えず虹色に変化します"
+        },
+        "kiro-chan.rainbowSpeed": {
+          "type": "number",
+          "default": 50,
+          "minimum": 10,
+          "maximum": 200,
+          "description": "虹色変化の速度（ミリ秒単位）- 小さいほど速く変化します"
         }
       }
     }
   },
   "publisher": "eltociear",
-  "version": "1.1.11",
+  "version": "1.1.14",
   "description": "Kiro character extension with SVG-based icons in status bar - BongoCat style implementation",
   "repository": "https://github.com/eltociear/kiro-chan.git",
   "license": "MIT",
