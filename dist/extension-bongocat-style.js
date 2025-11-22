@@ -42,12 +42,15 @@ let activeAnimationTimer;
 let colorMaintainTimer;
 let hoverDetectionTimer;
 let rainbowTimer;
+let diagnosticsDisposable;
+let activeEditorDisposable;
 let animationFrame = 0;
 let statusBarVisible = true;
 let isActiveState = false;
 let lastActivityTime = Date.now();
 let inactivityCheckTimer;
 let currentHue = 0;
+let hasErrors = false;
 const TASK_COMPLETE_THRESHOLD = 10000; // 10 seconds of inactivity = task complete
 // Icon states for different Kiro animations
 const KIRO_ICONS = {
@@ -88,6 +91,8 @@ function activate(context) {
     if (config.get('rainbowMode', false)) {
         startRainbowAnimation();
     }
+    // Setup diagnostics listener for error detection
+    setupDiagnosticsListener();
     // Listen for text document changes (similar to BongoCat)
     const textChangeDisposable = vscode.workspace.onDidChangeTextDocument((event) => {
         if (statusBarVisible && event.contentChanges.length > 0) {
@@ -121,6 +126,16 @@ function activate(context) {
             }
             else {
                 stopRainbowAnimation();
+            }
+        }
+        if (event.affectsConfiguration('kiro-chan.diagnosticsEnabled')) {
+            console.log('Diagnostics setting changed, updating...');
+            const config = vscode.workspace.getConfiguration('kiro-chan');
+            if (config.get('diagnosticsEnabled', true)) {
+                setupDiagnosticsListener();
+            }
+            else {
+                stopDiagnosticsListener();
             }
         }
     });
@@ -346,6 +361,83 @@ function stopRainbowAnimation() {
     applyTextColor();
     console.log('Rainbow animation stopped');
 }
+// Diagnostics functions
+function checkDiagnostics() {
+    const config = vscode.workspace.getConfiguration('kiro-chan');
+    if (!config.get('diagnosticsEnabled', true)) {
+        // If diagnostics disabled, clear background
+        if (statusBarItem) {
+            statusBarItem.backgroundColor = undefined;
+        }
+        hasErrors = false;
+        return;
+    }
+    const activeEditor = vscode.window.activeTextEditor;
+    if (!activeEditor) {
+        // No active editor, clear background
+        if (statusBarItem) {
+            statusBarItem.backgroundColor = undefined;
+        }
+        hasErrors = false;
+        return;
+    }
+    const uri = activeEditor.document.uri;
+    const diagnostics = vscode.languages.getDiagnostics(uri);
+    // Check for errors (DiagnosticSeverity.Error = 0)
+    const errorCount = diagnostics.filter(d => d.severity === vscode.DiagnosticSeverity.Error).length;
+    const warningCount = diagnostics.filter(d => d.severity === vscode.DiagnosticSeverity.Warning).length;
+    if (statusBarItem) {
+        if (errorCount > 0) {
+            // Has errors - red background
+            statusBarItem.backgroundColor = new vscode.ThemeColor('statusBarItem.errorBackground');
+            hasErrors = true;
+            console.log(`Diagnostics: ${errorCount} error(s) found`);
+        }
+        else if (warningCount > 0) {
+            // Has warnings - yellow/warning background
+            statusBarItem.backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
+            hasErrors = false;
+            console.log(`Diagnostics: ${warningCount} warning(s) found`);
+        }
+        else {
+            // No errors or warnings - clear background
+            statusBarItem.backgroundColor = undefined;
+            hasErrors = false;
+        }
+    }
+}
+function setupDiagnosticsListener() {
+    const config = vscode.workspace.getConfiguration('kiro-chan');
+    if (!config.get('diagnosticsEnabled', true)) {
+        return;
+    }
+    // Listen for diagnostics changes
+    diagnosticsDisposable = vscode.languages.onDidChangeDiagnostics(() => {
+        checkDiagnostics();
+    });
+    // Listen for active editor changes
+    activeEditorDisposable = vscode.window.onDidChangeActiveTextEditor(() => {
+        checkDiagnostics();
+    });
+    // Initial check
+    checkDiagnostics();
+    console.log('Diagnostics listener started');
+}
+function stopDiagnosticsListener() {
+    if (diagnosticsDisposable) {
+        diagnosticsDisposable.dispose();
+        diagnosticsDisposable = undefined;
+    }
+    if (activeEditorDisposable) {
+        activeEditorDisposable.dispose();
+        activeEditorDisposable = undefined;
+    }
+    if (statusBarItem) {
+        statusBarItem.backgroundColor = undefined;
+    }
+    hasErrors = false;
+    console.log('Diagnostics listener stopped');
+}
 function showStatusBar() {
     if (statusBarItem) {
         statusBarItem.show();
@@ -442,6 +534,8 @@ function deactivate() {
         clearInterval(rainbowTimer);
         rainbowTimer = undefined;
     }
+    // Stop diagnostics listener
+    stopDiagnosticsListener();
     if (statusBarItem) {
         statusBarItem.dispose();
     }

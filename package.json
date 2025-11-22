@@ -130,12 +130,17 @@
           "minimum": 10,
           "maximum": 200,
           "description": "虹色変化の速度（ミリ秒単位）- 小さいほど速く変化します"
+        },
+        "kiro-chan.diagnosticsEnabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "静的解析エラー表示 - 有効にするとエラーがある場合に背景色が赤くなります"
         }
       }
     }
   },
   "publisher": "eltociear",
-  "version": "1.1.14",
+  "version": "1.1.15",
   "description": "Kiro character extension with SVG-based icons in status bar - BongoCat style implementation",
   "repository": "https://github.com/eltociear/kiro-chan.git",
   "license": "MIT",
