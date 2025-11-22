@@ -131,37 +131,13 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.window.showInformationMessage('Kiro Character is now hidden');
         }
     });
-    
-    const setIdleCommand = vscode.commands.registerCommand('kiro-chan.setIdle', () => {
-        updateStatusBarIcon(KIRO_ICONS.idle);
-        vscode.window.showInformationMessage('Kiro: Idle state');
-    });
-
-    const setActiveCommand = vscode.commands.registerCommand('kiro-chan.setActive', () => {
-        updateStatusBarIcon(KIRO_ICONS.active);
-        vscode.window.showInformationMessage('Kiro: Active state');
-    });
-
-    const setErrorCommand = vscode.commands.registerCommand('kiro-chan.setError', () => {
-        updateStatusBarIcon(KIRO_ICONS.error);
-        vscode.window.showInformationMessage('Kiro: Error state');
-    });
-    
-    const setCompleteCommand = vscode.commands.registerCommand('kiro-chan.setComplete', () => {
-        updateStatusBarIcon(KIRO_ICONS.complete);
-        vscode.window.showInformationMessage('Kiro: Task completed!');
-    });
 
     // Add to subscriptions
     context.subscriptions.push(
         statusBarItem,
         textChangeDisposable,
         configChangeDisposable,
-        toggleCommand,
-        setIdleCommand,
-        setActiveCommand,
-        setErrorCommand,
-        setCompleteCommand
+        toggleCommand
     );
 
     console.log('✅ Kiro-Chan BongoCat-style extension activated successfully!');

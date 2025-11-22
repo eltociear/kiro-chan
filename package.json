@@ -54,26 +54,6 @@
         "command": "kiro-chan.toggleStatusBar",
         "title": "Toggle Kiro Character",
         "category": "Kiro Chan"
-      },
-      {
-        "command": "kiro-chan.setIdle",
-        "title": "Set Idle State",
-        "category": "Kiro Chan"
-      },
-      {
-        "command": "kiro-chan.setActive",
-        "title": "Set Active State",
-        "category": "Kiro Chan"
-      },
-      {
-        "command": "kiro-chan.setError",
-        "title": "Set Error State",
-        "category": "Kiro Chan"
-      },
-      {
-        "command": "kiro-chan.setComplete",
-        "title": "Set Complete State",
-        "category": "Kiro Chan"
       }
     ],
     "configuration": {
@@ -140,7 +120,7 @@
     }
   },
   "publisher": "eltociear",
-  "version": "1.1.15",
+  "version": "1.2.0",
   "description": "Your coding buddy that reacts to your code! Rainbow vibes when you're in the zone, turns RED when bugs appear. Never code alone again.",
   "repository": "https://github.com/eltociear/kiro-chan.git",
   "license": "MIT",
