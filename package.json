@@ -141,7 +141,7 @@
   },
   "publisher": "eltociear",
   "version": "1.1.15",
-  "description": "Kiro character extension with SVG-based icons in status bar - BongoCat style implementation",
+  "description": "Your coding buddy that reacts to your code! Rainbow vibes when you're in the zone, turns RED when bugs appear. Never code alone again.",
   "repository": "https://github.com/eltociear/kiro-chan.git",
   "license": "MIT",
   "author": "Kiro Status Character Extension Contributors",
